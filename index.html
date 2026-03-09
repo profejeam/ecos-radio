@@ -911,7 +911,7 @@
       </h1>
       <p class="hero-sub">Buena música, fe y esperanza<br>las 24 horas del día.</p>
       <div class="hero-actions">
-        <a href="#" class="btn-primary" onclick="togglePlay()" id="hero-play-btn">
+        <a href="#" class="btn-primary" id="hero-play-btn">
           <svg width="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
           Escuchar en Vivo
         </a>
@@ -1210,7 +1210,7 @@
       <button class="ctrl-btn" onclick="prevSong()" title="Anterior">
         <svg width="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
       </button>
-      <button class="ctrl-btn main" id="play-btn" onclick="togglePlay()" title="Play/Pause">
+      <button class="ctrl-btn main" id="play-btn" title="Play/Pause">
         <svg id="play-icon" width="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
       </button>
       <button class="ctrl-btn" onclick="nextSong()" title="Siguiente">
@@ -1228,36 +1228,49 @@
   <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
     // ── AUDIO STREAM ──
     const STREAM_URL = 'https://server2.ejeserver.com:8630/stream';
-    const audio = new Audio();
-    audio.crossOrigin = 'anonymous';
+    let audio = null;
     let isPlaying = false;
 
-    function togglePlay() {
+    function togglePlay(e) {
+      if (e) e.preventDefault();
+
+      if (!audio) {
+        audio = new Audio();
+      }
+
       if (!isPlaying) {
-        document.getElementById('player-song').textContent = 'Ecos 95.7 FM · En Vivo';
-        document.getElementById('player-artist').textContent = 'Buena Noticia · Cargando...';
+        updateInfo('Ecos 95.7 FM · En Vivo', 'Conectando...');
         audio.src = STREAM_URL;
-        audio.play()
-          .then(() => {
-            document.getElementById('player-artist').textContent = 'Buena Noticia · En directo';
-          })
-          .catch(() => {
-            document.getElementById('player-artist').textContent = 'Error al conectar — intenta de nuevo';
+        audio.load();
+        var playPromise = audio.play();
+        if (playPromise !== undefined) {
+          playPromise.then(function() {
+            updateInfo('Ecos 95.7 FM · En Vivo', 'En directo 🔴');
+          }).catch(function(err) {
+            console.error('Error:', err);
+            updateInfo('Ecos 95.7 FM', 'Error al conectar');
+            setPlayingState(false);
           });
-        setPlaying(true);
+        }
+        setPlayingState(true);
       } else {
         audio.pause();
         audio.src = '';
-        setPlaying(false);
-        document.getElementById('player-artist').textContent = 'Buena Noticia · En vivo';
+        updateInfo('Ecos 95.7 FM', 'Pausa · Click para continuar');
+        setPlayingState(false);
       }
     }
 
-    function setPlaying(state) {
+    function updateInfo(song, artist) {
+      document.getElementById('player-song').textContent = song;
+      document.getElementById('player-artist').textContent = artist;
+    }
+
+    function setPlayingState(state) {
       isPlaying = state;
-      const art = document.getElementById('player-art');
-      const icon = document.getElementById('play-icon');
-      const btn = document.getElementById('play-btn');
+      var art = document.getElementById('player-art');
+      var icon = document.getElementById('play-icon');
+      var btn = document.getElementById('play-btn');
       if (state) {
         icon.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
         art.classList.add('playing');
@@ -1270,35 +1283,29 @@
       }
     }
 
-    audio.addEventListener('error', () => {
-      setPlaying(false);
-      document.getElementById('player-artist').textContent = 'Error de conexión — intenta de nuevo';
+    // Bind buttons after DOM ready
+    document.addEventListener('DOMContentLoaded', function() {
+      var playBtn = document.getElementById('play-btn');
+      var heroBtn = document.getElementById('hero-play-btn');
+      if (playBtn) playBtn.addEventListener('click', function(e) { togglePlay(e); });
+      if (heroBtn) heroBtn.addEventListener('click', function(e) { togglePlay(e); });
+
+      // Volume slider
+      var vol = document.querySelector('.volume-slider');
+      if (vol) {
+        vol.addEventListener('input', function() {
+          if (audio) audio.volume = this.value / 100;
+          this.style.background = 'linear-gradient(to right, var(--blue) ' + this.value + '%, rgba(255,255,255,0.15) ' + this.value + '%)';
+        });
+      }
     });
 
-    audio.addEventListener('waiting', () => {
-      document.getElementById('player-artist').textContent = 'Buena Noticia · Cargando...';
-    });
-
-    audio.addEventListener('playing', () => {
-      document.getElementById('player-artist').textContent = 'Buena Noticia · En directo 🔴';
-    });
-
-    function playSong(name, artist) {
-      // Song cards now trigger live stream
-      if (!isPlaying) togglePlay();
-    }
-
+    function playSong() { togglePlay(); }
     function prevSong() { if (!isPlaying) togglePlay(); }
     function nextSong() { if (!isPlaying) togglePlay(); }
-
     function setVolume(v) {
-      audio.volume = v / 100;
-      const slider = document.querySelector('.volume-slider');
-      slider.style.background = `linear-gradient(to right, var(--blue) ${v}%, rgba(255,255,255,0.15) ${v}%)`;
+      if (audio) audio.volume = v / 100;
     }
-
-    // Set initial volume
-    audio.volume = 0.7;
 
     let progress = 35;
     function animateProgress() {
