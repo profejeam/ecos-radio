@@ -911,10 +911,10 @@
       </h1>
       <p class="hero-sub">Buena música, fe y esperanza<br>las 24 horas del día.</p>
       <div class="hero-actions">
-        <a href="#" class="btn-primary" id="hero-play-btn">
-          <svg width="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-          Escuchar en Vivo
-        </a>
+        <button class="btn-primary" id="hero-play-btn" style="border:none;cursor:pointer;">
+          <svg id="hero-play-icon" width="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          <span id="hero-play-text">Escuchar en Vivo</span>
+        </button>
         <a href="#programs" class="btn-secondary">Ver Programas →</a>
       </div>
     </div>
@@ -1278,15 +1278,21 @@
       const art = document.getElementById('player-art');
       const icon = document.getElementById('play-icon');
       const btn = document.getElementById('play-btn');
+      const heroIcon = document.getElementById('hero-play-icon');
+      const heroText = document.getElementById('hero-play-text');
       if (state) {
         icon.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
         art.classList.add('playing');
         btn.style.boxShadow = '0 0 30px rgba(176,58,140,0.7)';
+        if (heroIcon) heroIcon.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+        if (heroText) heroText.textContent = 'Pausar';
         animateProgress();
       } else {
         icon.innerHTML = '<path d="M8 5v14l11-7z"/>';
         art.classList.remove('playing');
         btn.style.boxShadow = '0 0 20px rgba(176,58,140,0.4)';
+        if (heroIcon) heroIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
+        if (heroText) heroText.textContent = 'Escuchar en Vivo';
       }
     }
 
