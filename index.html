@@ -1194,6 +1194,9 @@
     </div>
   </section>
 
+  <!-- HIDDEN AUDIO ELEMENT -->
+  <audio id="radio-audio" preload="none" crossorigin="anonymous"></audio>
+
   <!-- FIXED PLAYER -->
   <div id="player">
     <div class="player-progress-bar" id="progress-bar"></div>
@@ -1228,37 +1231,41 @@
   <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
     // ── AUDIO STREAM ──
     const STREAM_URL = 'https://server2.ejeserver.com:8630/stream';
-    let audio = null;
     let isPlaying = false;
+
+    // Create audio element in HTML for better browser compatibility
+    const audio = document.getElementById('radio-audio');
 
     function togglePlay(e) {
       if (e) e.preventDefault();
-
-      if (!audio) {
-        audio = new Audio();
-      }
-
       if (!isPlaying) {
-        updateInfo('Ecos 95.7 FM · En Vivo', 'Conectando...');
-        audio.src = STREAM_URL;
-        audio.load();
-        var playPromise = audio.play();
-        if (playPromise !== undefined) {
-          playPromise.then(function() {
-            updateInfo('Ecos 95.7 FM · En Vivo', 'En directo 🔴');
-          }).catch(function(err) {
-            console.error('Error:', err);
-            updateInfo('Ecos 95.7 FM', 'Error al conectar');
-            setPlayingState(false);
-          });
-        }
-        setPlayingState(true);
+        startStream();
       } else {
-        audio.pause();
-        audio.src = '';
-        updateInfo('Ecos 95.7 FM', 'Pausa · Click para continuar');
-        setPlayingState(false);
+        stopStream();
       }
+    }
+
+    function startStream() {
+      updateInfo('Ecos 95.7 FM · En Vivo', 'Conectando...');
+      audio.src = STREAM_URL + '?t=' + Date.now();
+      audio.volume = 0.8;
+      audio.play().then(function() {
+        setPlayingState(true);
+        updateInfo('Ecos 95.7 FM · En Vivo', 'En directo 🔴');
+      }).catch(function(err) {
+        console.warn('Play error:', err);
+        // Fallback: open stream in new tab
+        updateInfo('Ecos 95.7 FM', 'Abriendo en nueva pestaña...');
+        window.open(STREAM_URL, '_blank');
+        setPlayingState(false);
+      });
+    }
+
+    function stopStream() {
+      audio.pause();
+      audio.src = '';
+      setPlayingState(false);
+      updateInfo('Ecos 95.7 FM', 'Click ▶ para escuchar en vivo');
     }
 
     function updateInfo(song, artist) {
@@ -1268,9 +1275,9 @@
 
     function setPlayingState(state) {
       isPlaying = state;
-      var art = document.getElementById('player-art');
-      var icon = document.getElementById('play-icon');
-      var btn = document.getElementById('play-btn');
+      const art = document.getElementById('player-art');
+      const icon = document.getElementById('play-icon');
+      const btn = document.getElementById('play-btn');
       if (state) {
         icon.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
         art.classList.add('playing');
@@ -1283,29 +1290,39 @@
       }
     }
 
-    // Bind buttons after DOM ready
-    document.addEventListener('DOMContentLoaded', function() {
-      var playBtn = document.getElementById('play-btn');
-      var heroBtn = document.getElementById('hero-play-btn');
-      if (playBtn) playBtn.addEventListener('click', function(e) { togglePlay(e); });
-      if (heroBtn) heroBtn.addEventListener('click', function(e) { togglePlay(e); });
+    audio.addEventListener('error', function() {
+      console.warn('Audio error, trying fallback');
+      updateInfo('Ecos 95.7 FM', 'Abriendo en nueva pestaña...');
+      window.open(STREAM_URL, '_blank');
+      setPlayingState(false);
+    });
 
-      // Volume slider
+    audio.addEventListener('playing', function() {
+      setPlayingState(true);
+      updateInfo('Ecos 95.7 FM · En Vivo', 'En directo 🔴');
+    });
+
+    audio.addEventListener('waiting', function() {
+      updateInfo('Ecos 95.7 FM · En Vivo', 'Cargando...');
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('play-btn').addEventListener('click', togglePlay);
+      document.getElementById('hero-play-btn').addEventListener('click', togglePlay);
+
       var vol = document.querySelector('.volume-slider');
       if (vol) {
         vol.addEventListener('input', function() {
-          if (audio) audio.volume = this.value / 100;
+          audio.volume = this.value / 100;
           this.style.background = 'linear-gradient(to right, var(--blue) ' + this.value + '%, rgba(255,255,255,0.15) ' + this.value + '%)';
         });
       }
     });
 
-    function playSong() { togglePlay(); }
-    function prevSong() { if (!isPlaying) togglePlay(); }
-    function nextSong() { if (!isPlaying) togglePlay(); }
-    function setVolume(v) {
-      if (audio) audio.volume = v / 100;
-    }
+    function playSong() { if (!isPlaying) startStream(); }
+    function prevSong() { if (!isPlaying) startStream(); }
+    function nextSong() { if (!isPlaying) startStream(); }
+    function setVolume(v) { audio.volume = v / 100; }
 
     let progress = 35;
     function animateProgress() {
