@@ -1226,23 +1226,39 @@
   </div>
 
   <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+    // ── AUDIO STREAM ──
+    const STREAM_URL = 'https://server2.ejeserver.com:8630/stream';
+    const audio = new Audio();
+    audio.crossOrigin = 'anonymous';
     let isPlaying = false;
-    const songs = [
-      { name: 'En Vivo · Ecos 95.7 FM', artist: 'Buena Noticia' },
-      { name: 'Grande y Poderoso', artist: 'Marcos Witt' },
-      { name: 'Renuévame', artist: 'Coro Celestial' },
-      { name: 'Tu Fidelidad', artist: 'Generación 12' },
-      { name: 'En Espíritu y en Verdad', artist: 'Averly Morillo' },
-    ];
-    let songIndex = 0;
 
     function togglePlay() {
-      isPlaying = !isPlaying;
-      const btn = document.getElementById('play-btn');
+      if (!isPlaying) {
+        document.getElementById('player-song').textContent = 'Ecos 95.7 FM · En Vivo';
+        document.getElementById('player-artist').textContent = 'Buena Noticia · Cargando...';
+        audio.src = STREAM_URL;
+        audio.play()
+          .then(() => {
+            document.getElementById('player-artist').textContent = 'Buena Noticia · En directo';
+          })
+          .catch(() => {
+            document.getElementById('player-artist').textContent = 'Error al conectar — intenta de nuevo';
+          });
+        setPlaying(true);
+      } else {
+        audio.pause();
+        audio.src = '';
+        setPlaying(false);
+        document.getElementById('player-artist').textContent = 'Buena Noticia · En vivo';
+      }
+    }
+
+    function setPlaying(state) {
+      isPlaying = state;
       const art = document.getElementById('player-art');
       const icon = document.getElementById('play-icon');
-
-      if (isPlaying) {
+      const btn = document.getElementById('play-btn');
+      if (state) {
         icon.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
         art.classList.add('playing');
         btn.style.boxShadow = '0 0 30px rgba(176,58,140,0.7)';
@@ -1254,30 +1270,35 @@
       }
     }
 
+    audio.addEventListener('error', () => {
+      setPlaying(false);
+      document.getElementById('player-artist').textContent = 'Error de conexión — intenta de nuevo';
+    });
+
+    audio.addEventListener('waiting', () => {
+      document.getElementById('player-artist').textContent = 'Buena Noticia · Cargando...';
+    });
+
+    audio.addEventListener('playing', () => {
+      document.getElementById('player-artist').textContent = 'Buena Noticia · En directo 🔴';
+    });
+
     function playSong(name, artist) {
-      document.getElementById('player-song').textContent = name;
-      document.getElementById('player-artist').textContent = artist;
+      // Song cards now trigger live stream
       if (!isPlaying) togglePlay();
     }
 
-    function prevSong() {
-      songIndex = (songIndex - 1 + songs.length) % songs.length;
-      const s = songs[songIndex];
-      document.getElementById('player-song').textContent = s.name;
-      document.getElementById('player-artist').textContent = s.artist;
-    }
-
-    function nextSong() {
-      songIndex = (songIndex + 1) % songs.length;
-      const s = songs[songIndex];
-      document.getElementById('player-song').textContent = s.name;
-      document.getElementById('player-artist').textContent = s.artist;
-    }
+    function prevSong() { if (!isPlaying) togglePlay(); }
+    function nextSong() { if (!isPlaying) togglePlay(); }
 
     function setVolume(v) {
+      audio.volume = v / 100;
       const slider = document.querySelector('.volume-slider');
       slider.style.background = `linear-gradient(to right, var(--blue) ${v}%, rgba(255,255,255,0.15) ${v}%)`;
     }
+
+    // Set initial volume
+    audio.volume = 0.7;
 
     let progress = 35;
     function animateProgress() {
