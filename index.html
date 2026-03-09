@@ -1254,9 +1254,7 @@
         updateInfo('Ecos 95.7 FM · En Vivo', 'En directo 🔴');
       }).catch(function(err) {
         console.warn('Play error:', err);
-        // Fallback: open stream in new tab
-        updateInfo('Ecos 95.7 FM', 'Abriendo en nueva pestaña...');
-        window.open(STREAM_URL, '_blank');
+        updateInfo('Ecos 95.7 FM', 'Click ▶ para escuchar en vivo');
         setPlayingState(false);
       });
     }
@@ -1297,9 +1295,8 @@
     }
 
     audio.addEventListener('error', function() {
-      console.warn('Audio error, trying fallback');
-      updateInfo('Ecos 95.7 FM', 'Abriendo en nueva pestaña...');
-      window.open(STREAM_URL, '_blank');
+      console.warn('Audio error');
+      updateInfo('Ecos 95.7 FM', 'Error de conexión — intenta de nuevo');
       setPlayingState(false);
     });
 
