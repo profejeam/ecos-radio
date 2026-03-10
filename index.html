@@ -1356,15 +1356,16 @@
       document.getElementById('songs-container').style.display = 'none';
 
       try {
-        const url = `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&media=music&limit=12&country=CO&lang=es_co`;
-        const proxy = 'https://api.allorigins.win/get?url=' + encodeURIComponent(url);
-        const res = await fetch(proxy);
+        // iTunes API supports CORS directly — no proxy needed
+        const url = `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&media=music&limit=12&country=CO`;
+        const res = await fetch(url);
         const data = await res.json();
-        const parsed = JSON.parse(data.contents);
-        renderSongs(parsed.results || []);
+        renderSongs(data.results || []);
       } catch(e) {
         console.warn('iTunes error:', e);
-        document.getElementById('songs-loading').innerHTML = '<p style="color:rgba(232,232,240,0.4);font-size:14px;">😕 No se pudieron cargar las canciones.</p>';
+        document.getElementById('songs-loading').style.display = 'none';
+        document.getElementById('songs-container').innerHTML = '<p style="color:rgba(232,232,240,0.4);font-size:14px;grid-column:1/-1;text-align:center;padding:40px 0;">😕 No se pudieron cargar las canciones. Intenta de nuevo.</p>';
+        document.getElementById('songs-container').style.display = 'grid';
       }
     }
 
