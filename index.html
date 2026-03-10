@@ -1416,27 +1416,45 @@
         currentPreview.pause();
         currentPreview.src = '';
         if (currentPreviewBtn) {
-          currentPreviewBtn.querySelector('svg path').setAttribute('d', 'M8 5v14l11-7z');
-          currentPreviewBtn.style.opacity = '';
-          currentPreviewBtn.closest('.song-card').style.borderColor = '';
+          currentPreviewBtn.querySelector('.song-play svg path')?.setAttribute('d', 'M8 5v14l11-7z');
+          currentPreviewBtn.querySelector('.song-play').style.opacity = '';
+          currentPreviewBtn.style.borderColor = '';
         }
-        if (currentPreviewBtn === cardEl && currentPreview) {
-          currentPreview = null;
-          currentPreviewBtn = null;
-          return;
-        }
+        const wasSame = currentPreviewBtn === cardEl;
+        currentPreview = null;
+        currentPreviewBtn = null;
+        if (wasSame) return;
       }
 
       if (!previewUrl) {
-        // No preview — just trigger live radio
         if (!isPlaying) startStream();
         return;
       }
 
-      // Play 30-second iTunes preview
+      // iTunes previews are on audio-ssl.itunes.apple.com — allow direct play
+      // They support CORS natively
       currentPreview = new Audio(previewUrl);
+      currentPreview.crossOrigin = 'anonymous';
       currentPreview.volume = audio ? audio.volume : 0.8;
-      currentPreview.play();
+
+      currentPreview.addEventListener('canplay', () => {
+        currentPreview.play().catch(err => {
+          console.warn('Preview error:', err);
+          // Open in new tab as fallback
+          window.open(previewUrl, '_blank');
+        });
+      });
+
+      currentPreview.addEventListener('error', (e) => {
+        console.warn('Preview load error:', e);
+        cardEl.style.borderColor = '';
+        const btn = cardEl.querySelector('.song-play');
+        if (btn) { btn.querySelector('svg path').setAttribute('d', 'M8 5v14l11-7z'); btn.style.opacity = ''; }
+        currentPreview = null;
+        currentPreviewBtn = null;
+      });
+
+      currentPreview.load();
       currentPreviewBtn = cardEl;
 
       cardEl.style.borderColor = 'rgba(74,159,212,0.6)';
@@ -1446,14 +1464,15 @@
         btn.style.opacity = '1';
       }
 
+      // Update player info
+      updateInfo(name, artist + ' · Vista previa iTunes');
+
       currentPreview.onended = () => {
         cardEl.style.borderColor = '';
-        if (btn) {
-          btn.querySelector('svg path').setAttribute('d', 'M8 5v14l11-7z');
-          btn.style.opacity = '';
-        }
+        if (btn) { btn.querySelector('svg path').setAttribute('d', 'M8 5v14l11-7z'); btn.style.opacity = ''; }
         currentPreview = null;
         currentPreviewBtn = null;
+        updateInfo('Ecos 95.7 FM · En Vivo', isPlaying ? 'En directo 🔴' : 'Click ▶ para escuchar en vivo');
       };
     }
 
