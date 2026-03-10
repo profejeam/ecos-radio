@@ -849,6 +849,44 @@
       opacity: 0.3;
     }
 
+    /* ── SONGS FILTERS ── */
+    .songs-filters {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+    }
+
+    .songs-filter-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: rgba(232,232,240,0.6);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      padding: 8px 18px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .songs-filter-btn:hover {
+      border-color: var(--blue);
+      color: var(--blue);
+    }
+
+    .songs-filter-btn.active {
+      background: linear-gradient(135deg, var(--blue), var(--magenta));
+      border-color: transparent;
+      color: #fff;
+    }
+
+    .song-cover img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
     /* ── NEWS FILTERS ── */
     .news-filters {
       display: flex;
@@ -992,81 +1030,24 @@
   <section id="top-songs">
     <div class="section-label">♫ Esta semana</div>
     <h2 class="section-title">Lo Más Sonado</h2>
-    <div class="songs-grid">
 
-      <div class="song-card" onclick="playSong('Grande y Poderoso', 'Marcos Witt')">
-        <div class="song-rank">01</div>
-        <div class="song-cover">🎵</div>
-        <div class="song-info">
-          <div class="song-name">Grande y Poderoso</div>
-          <div class="song-artist">Marcos Witt</div>
-        </div>
-        <button class="song-play" onclick="event.stopPropagation(); playSong('Grande y Poderoso','Marcos Witt')">
-          <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-        </button>
-      </div>
-
-      <div class="song-card" onclick="playSong('Renuévame', 'Coro Celestial')">
-        <div class="song-rank">02</div>
-        <div class="song-cover" style="background: linear-gradient(135deg, var(--magenta), var(--purple))">🙌</div>
-        <div class="song-info">
-          <div class="song-name">Renuévame</div>
-          <div class="song-artist">Coro Celestial</div>
-        </div>
-        <button class="song-play" onclick="event.stopPropagation(); playSong('Renuévame','Coro Celestial')">
-          <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-        </button>
-      </div>
-
-      <div class="song-card" onclick="playSong('Tu Fidelidad', 'Generación 12')">
-        <div class="song-rank">03</div>
-        <div class="song-cover" style="background: linear-gradient(135deg, var(--gold), #a06030)">✝️</div>
-        <div class="song-info">
-          <div class="song-name">Tu Fidelidad</div>
-          <div class="song-artist">Generación 12</div>
-        </div>
-        <button class="song-play" onclick="event.stopPropagation(); playSong('Tu Fidelidad','Generación 12')">
-          <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-        </button>
-      </div>
-
-      <div class="song-card" onclick="playSong('En Espíritu y en Verdad', 'Averly Morillo')">
-        <div class="song-rank">04</div>
-        <div class="song-cover" style="background: linear-gradient(135deg, #2a5a8a, var(--blue))">🕊️</div>
-        <div class="song-info">
-          <div class="song-name">En Espíritu y en Verdad</div>
-          <div class="song-artist">Averly Morillo</div>
-        </div>
-        <button class="song-play" onclick="event.stopPropagation(); playSong('En Espíritu y en Verdad','Averly Morillo')">
-          <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-        </button>
-      </div>
-
-      <div class="song-card" onclick="playSong('Bendito el Nombre', 'Tercer Cielo')">
-        <div class="song-rank">05</div>
-        <div class="song-cover" style="background: linear-gradient(135deg, #4a1a6a, var(--magenta))">⭐</div>
-        <div class="song-info">
-          <div class="song-name">Bendito el Nombre</div>
-          <div class="song-artist">Tercer Cielo</div>
-        </div>
-        <button class="song-play" onclick="event.stopPropagation(); playSong('Bendito el Nombre','Tercer Cielo')">
-          <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-        </button>
-      </div>
-
-      <div class="song-card" onclick="playSong('Gozo Inefable', 'Evan Craft')">
-        <div class="song-rank">06</div>
-        <div class="song-cover" style="background: linear-gradient(135deg, #1a4a3a, #2d8a60)">🎶</div>
-        <div class="song-info">
-          <div class="song-name">Gozo Inefable</div>
-          <div class="song-artist">Evan Craft</div>
-        </div>
-        <button class="song-play" onclick="event.stopPropagation(); playSong('Gozo Inefable','Evan Craft')">
-          <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-        </button>
-      </div>
-
+    <!-- Filtros de búsqueda -->
+    <div class="songs-filters">
+      <button class="songs-filter-btn active" onclick="searchSongs('musica cristiana', this)">🙌 Cristiana</button>
+      <button class="songs-filter-btn" onclick="searchSongs('worship español', this)">🕊️ Worship</button>
+      <button class="songs-filter-btn" onclick="searchSongs('marcos witt', this)">🎤 Marcos Witt</button>
+      <button class="songs-filter-btn" onclick="searchSongs('tercer cielo', this)">⭐ Tercer Cielo</button>
+      <button class="songs-filter-btn" onclick="searchSongs('averly morillo', this)">🎵 Averly Morillo</button>
     </div>
+
+    <!-- Loading -->
+    <div id="songs-loading" style="text-align:center;padding:60px 0;color:rgba(232,232,240,0.4);">
+      <div class="news-spinner"></div>
+      <p style="margin-top:16px;font-size:14px;">Cargando canciones...</p>
+    </div>
+
+    <!-- Grid de canciones -->
+    <div class="songs-grid" id="songs-container" style="display:none;"></div>
   </section>
 
   <div class="gradient-divider"></div>
@@ -1362,7 +1343,125 @@
       requestAnimationFrame(animateProgress);
     }
 
-    // ── NOTICIAS DINÁMICAS ──
+    // ── ITUNES API — LO MÁS SONADO ──
+    let currentPreview = null;
+    let currentPreviewBtn = null;
+
+    async function searchSongs(term, btnEl) {
+      // Update active button
+      document.querySelectorAll('.songs-filter-btn').forEach(b => b.classList.remove('active'));
+      if (btnEl) btnEl.classList.add('active');
+
+      document.getElementById('songs-loading').style.display = 'block';
+      document.getElementById('songs-container').style.display = 'none';
+
+      try {
+        const url = `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&media=music&limit=12&country=CO&lang=es_co`;
+        const proxy = 'https://api.allorigins.win/get?url=' + encodeURIComponent(url);
+        const res = await fetch(proxy);
+        const data = await res.json();
+        const parsed = JSON.parse(data.contents);
+        renderSongs(parsed.results || []);
+      } catch(e) {
+        console.warn('iTunes error:', e);
+        document.getElementById('songs-loading').innerHTML = '<p style="color:rgba(232,232,240,0.4);font-size:14px;">😕 No se pudieron cargar las canciones.</p>';
+      }
+    }
+
+    function renderSongs(songs) {
+      document.getElementById('songs-loading').style.display = 'none';
+      const container = document.getElementById('songs-container');
+
+      if (!songs.length) {
+        container.innerHTML = '<p style="color:rgba(232,232,240,0.4);font-size:14px;grid-column:1/-1;">Sin resultados.</p>';
+        container.style.display = 'grid';
+        return;
+      }
+
+      container.innerHTML = songs.map((song, i) => `
+        <div class="song-card" onclick="previewSong('${song.previewUrl || ''}', '${song.trackName?.replace(/'/g,"\\'")||''}', '${song.artistName?.replace(/'/g,"\\'")||''}', this)">
+          <div class="song-rank">${String(i+1).padStart(2,'0')}</div>
+          <div class="song-cover" style="background:linear-gradient(135deg,var(--blue),var(--magenta));overflow:hidden;">
+            ${song.artworkUrl100
+              ? `<img src="${song.artworkUrl100}" alt="${song.trackName}" style="width:52px;height:52px;border-radius:8px;object-fit:cover;" onerror="this.parentElement.innerHTML='🎵'"/>`
+              : '🎵'}
+          </div>
+          <div class="song-info">
+            <div class="song-name">${song.trackName || ''}</div>
+            <div class="song-artist">${song.artistName || ''}</div>
+          </div>
+          <button class="song-play" data-preview="${song.previewUrl||''}" onclick="event.stopPropagation(); previewSong('${song.previewUrl||''}','${song.trackName?.replace(/'/g,"\\'")||''}','${song.artistName?.replace(/'/g,"\\'")||''}', this.closest('.song-card'))">
+            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          </button>
+        </div>
+      `).join('');
+
+      container.style.display = 'grid';
+
+      // Animate cards
+      container.querySelectorAll('.song-card').forEach((el, i) => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(16px)';
+        setTimeout(() => {
+          el.style.transition = 'opacity 0.4s ease, transform 0.4s ease, border-color 0.25s';
+          el.style.opacity = '1';
+          el.style.transform = 'translateY(0)';
+        }, i * 60);
+      });
+    }
+
+    function previewSong(previewUrl, name, artist, cardEl) {
+      // Stop current preview
+      if (currentPreview) {
+        currentPreview.pause();
+        currentPreview.src = '';
+        if (currentPreviewBtn) {
+          currentPreviewBtn.querySelector('svg path').setAttribute('d', 'M8 5v14l11-7z');
+          currentPreviewBtn.style.opacity = '';
+          currentPreviewBtn.closest('.song-card').style.borderColor = '';
+        }
+        if (currentPreviewBtn === cardEl && currentPreview) {
+          currentPreview = null;
+          currentPreviewBtn = null;
+          return;
+        }
+      }
+
+      if (!previewUrl) {
+        // No preview — just trigger live radio
+        if (!isPlaying) startStream();
+        return;
+      }
+
+      // Play 30-second iTunes preview
+      currentPreview = new Audio(previewUrl);
+      currentPreview.volume = audio ? audio.volume : 0.8;
+      currentPreview.play();
+      currentPreviewBtn = cardEl;
+
+      cardEl.style.borderColor = 'rgba(74,159,212,0.6)';
+      const btn = cardEl.querySelector('.song-play');
+      if (btn) {
+        btn.querySelector('svg path').setAttribute('d', 'M6 19h4V5H6v14zm8-14v14h4V5h-4z');
+        btn.style.opacity = '1';
+      }
+
+      currentPreview.onended = () => {
+        cardEl.style.borderColor = '';
+        if (btn) {
+          btn.querySelector('svg path').setAttribute('d', 'M8 5v14l11-7z');
+          btn.style.opacity = '';
+        }
+        currentPreview = null;
+        currentPreviewBtn = null;
+      };
+    }
+
+    // Load default songs on page load
+    searchSongs('musica cristiana en español', null);
+    // ── FIN ITUNES ──
+
+
     const FEEDS = {
       colombia: [
         'https://feeds.bbci.co.uk/mundo/rss.xml',
@@ -1429,18 +1528,34 @@
           const items = Array.from(xml.querySelectorAll('item, entry')).slice(0, 10);
           if (items.length === 0) continue;
 
-          return items.map(item => ({
-            title: item.querySelector('title')?.textContent?.trim() || '',
-            link: item.querySelector('link')?.textContent?.trim() ||
-                  item.querySelector('link')?.getAttribute('href') || '#',
-            description: item.querySelector('description')?.textContent ||
-                         item.querySelector('summary')?.textContent || '',
-            pubDate: item.querySelector('pubDate')?.textContent ||
-                     item.querySelector('published')?.textContent || '',
-            thumbnail: item.querySelector('enclosure')?.getAttribute('url') ||
-                       item.querySelector('thumbnail')?.getAttribute('url') || '',
-            feedUrl: url
-          }));
+          return items.map(item => {
+            // Extract image from every possible RSS field
+            const enclosure = item.querySelector('enclosure[type^="image"]')?.getAttribute('url');
+            const mediaThumbnail = item.querySelector('thumbnail')?.getAttribute('url');
+            const mediaContent = item.querySelector('content[medium="image"]')?.getAttribute('url') ||
+                                 item.querySelector('content[type^="image"]')?.getAttribute('url');
+            const mediaContentUrl = item.querySelector('content')?.getAttribute('url');
+
+            // Try to extract image from description/content HTML
+            const rawDesc = item.querySelector('description')?.textContent ||
+                            item.querySelector('summary')?.textContent ||
+                            item.querySelector('content')?.textContent || '';
+            const imgMatch = rawDesc.match(/<img[^>]+src=["']([^"']+)["']/i);
+            const descImg = imgMatch ? imgMatch[1] : '';
+
+            const thumbnail = enclosure || mediaThumbnail || mediaContent || mediaContentUrl || descImg || '';
+
+            return {
+              title: item.querySelector('title')?.textContent?.trim() || '',
+              link: item.querySelector('link')?.textContent?.trim() ||
+                    item.querySelector('link')?.getAttribute('href') || '#',
+              description: rawDesc,
+              pubDate: item.querySelector('pubDate')?.textContent ||
+                       item.querySelector('published')?.textContent || '',
+              thumbnail: thumbnail,
+              feedUrl: url
+            };
+          });
         } catch(e) {
           console.warn('Proxy failed:', proxy, e.message);
           continue;
@@ -1474,6 +1589,23 @@
       renderNews();
     }
 
+    // Gradient placeholders when no image available
+    const PLACEHOLDERS = [
+      'linear-gradient(135deg, #0d1a3a, #1a3a7a)',
+      'linear-gradient(135deg, #2d0d40, #6a1a80)',
+      'linear-gradient(135deg, #0d2a1a, #1a5a30)',
+      'linear-gradient(135deg, #3a1a0d, #7a3a1a)',
+      'linear-gradient(135deg, #1a1a3a, #3a2a60)',
+    ];
+    const PLACEHOLDER_ICONS = ['🌟','✝️','🎵','🙏','🌍','📖','🕊️','⭐','🎤','🌿'];
+
+    function getPlaceholder(index) {
+      return {
+        bg: PLACEHOLDERS[index % PLACEHOLDERS.length],
+        icon: PLACEHOLDER_ICONS[index % PLACEHOLDER_ICONS.length]
+      };
+    }
+
     function renderNews() {
       const container = document.getElementById('news-container');
       const visible = allNews.slice(0, visibleCount);
@@ -1487,28 +1619,38 @@
       const featured = visible[0];
       const smalls = visible.slice(1);
       const ftag = tagForFeed(featured.feedUrl || '');
+      const fph = getPlaceholder(0);
 
       let html = `
         <div class="news-featured" onclick="window.open('${featured.link}','_blank')" style="cursor:pointer;">
-          <div class="news-featured-img" style="background: linear-gradient(135deg, #0d1a3a, #1a2060);">
-            ${featured.thumbnail ? `<img src="${featured.thumbnail}" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='🌟'"/>` : '🌟'}
+          <div class="news-featured-img" style="background:${fph.bg}; overflow:hidden; position:relative;">
+            ${featured.thumbnail
+              ? `<img src="${featured.thumbnail}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" onerror="this.style.display='none'"/><span style="position:relative;z-index:1;font-size:64px;">${fph.icon}</span>`
+              : `<span style="font-size:64px;">${fph.icon}</span>`
+            }
           </div>
           <div class="news-featured-body">
             <span class="news-tag" style="border-color:${ftag.color};color:${ftag.color};">${ftag.icon} ${ftag.label}</span>
             <div class="news-featured-title">${featured.title || ''}</div>
-            <div class="news-featured-excerpt">${truncate(featured.description || featured.content || '', 180)}</div>
+            <div class="news-featured-excerpt">${truncate(featured.description || '', 180)}</div>
             <div class="news-date">${formatDate(featured.pubDate)}</div>
           </div>
         </div>`;
 
-      smalls.forEach(item => {
+      smalls.forEach((item, i) => {
         const stag = tagForFeed(item.feedUrl || '');
+        const sph = getPlaceholder(i + 1);
         html += `
         <div class="news-small" onclick="window.open('${item.link}','_blank')" style="cursor:pointer;">
-          <div class="news-small-icon" style="background:linear-gradient(135deg,rgba(74,159,212,0.2),rgba(176,58,140,0.2))">${stag.icon}</div>
+          <div class="news-small-thumb" style="background:${sph.bg}; width:72px; height:72px; border-radius:10px; flex-shrink:0; overflow:hidden; display:flex; align-items:center; justify-content:center; font-size:24px; position:relative;">
+            ${item.thumbnail
+              ? `<img src="${item.thumbnail}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" onerror="this.style.display='none'"/><span style="position:relative;z-index:1;">${sph.icon}</span>`
+              : sph.icon
+            }
+          </div>
           <div>
             <div class="news-small-title">${item.title || ''}</div>
-            <div class="news-small-date" style="color:${stag.color};margin-bottom:2px;font-size:10px;">${stag.label}</div>
+            <div class="news-small-date" style="color:${stag.color};margin-bottom:2px;font-size:10px;letter-spacing:1px;">${stag.icon} ${stag.label}</div>
             <div class="news-small-date">${formatDate(item.pubDate)}</div>
           </div>
         </div>`;
@@ -1517,7 +1659,6 @@
       container.innerHTML = html;
       container.style.display = 'grid';
 
-      // Show "ver más" if there are more
       const moreBtn = document.getElementById('news-more-btn');
       moreBtn.style.display = allNews.length > visibleCount ? 'block' : 'none';
     }
