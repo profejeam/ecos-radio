@@ -1366,11 +1366,11 @@
     const FEEDS = {
       colombia: [
         'https://feeds.bbci.co.uk/mundo/rss.xml',
-        'https://www.elcolombiano.com/googlenews.xml',
+        'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/america-colombia/portada',
       ],
       religion: [
         'https://www.aciprensa.com/feed',
-        'https://www.vaticannews.va/es.rss.xml',
+        'https://feeds.bbci.co.uk/mundo/rss.xml',
       ]
     };
 
@@ -1392,38 +1392,61 @@
     }
 
     function tagForFeed(url) {
-      if (url.includes('vatican') || url.includes('aciprensa')) return { label: 'Fe', icon: '✝️', color: 'var(--magenta)' };
+      if (url.includes('aciprensa')) return { label: 'Fe', icon: '✝️', color: 'var(--magenta)' };
       if (url.includes('bbc')) return { label: 'BBC Mundo', icon: '🌎', color: 'var(--blue)' };
-      if (url.includes('elcolombiano')) return { label: 'El Colombiano', icon: '🇨🇴', color: 'var(--gold)' };
+      if (url.includes('elpais')) return { label: 'El País Colombia', icon: '🇨🇴', color: 'var(--gold)' };
       return { label: 'Noticias', icon: '📰', color: 'var(--blue)' };
     }
 
     async function fetchFeed(url) {
-      // Use allorigins as CORS proxy to parse RSS
-      const proxy = 'https://api.allorigins.win/get?url=' + encodeURIComponent(url);
-      try {
-        const res = await fetch(proxy);
-        const data = await res.json();
-        if (!data.contents) return [];
+      // Try allorigins first, then corsproxy as fallback
+      const proxies = [
+        'https://api.allorigins.win/get?url=' + encodeURIComponent(url),
+        'https://corsproxy.io/?' + encodeURIComponent(url),
+      ];
 
-        // Parse XML
-        const parser = new DOMParser();
-        const xml = parser.parseFromString(data.contents, 'text/xml');
-        const items = Array.from(xml.querySelectorAll('item')).slice(0, 10);
+      for (const proxy of proxies) {
+        try {
+          const res = await fetch(proxy, { signal: AbortSignal.timeout(8000) });
+          if (!res.ok) continue;
 
-        return items.map(item => ({
-          title: item.querySelector('title')?.textContent || '',
-          link: item.querySelector('link')?.textContent || item.querySelector('guid')?.textContent || '#',
-          description: item.querySelector('description')?.textContent || '',
-          pubDate: item.querySelector('pubDate')?.textContent || '',
-          thumbnail: item.querySelector('enclosure')?.getAttribute('url') ||
-                     item.querySelector('thumbnail')?.getAttribute('url') || '',
-          feedUrl: url
-        }));
-      } catch(e) {
-        console.warn('Feed error:', url, e);
-        return [];
+          let text = '';
+          if (proxy.includes('allorigins')) {
+            const data = await res.json();
+            text = data.contents || '';
+          } else {
+            text = await res.text();
+          }
+
+          if (!text || text.trim().startsWith('{') === false && !text.includes('<rss') && !text.includes('<feed')) continue;
+          if (text.trim().startsWith('{')) {
+            // allorigins returned JSON wrapper
+            try { text = JSON.parse(text).contents || text; } catch(e) {}
+          }
+
+          const parser = new DOMParser();
+          const xml = parser.parseFromString(text, 'text/xml');
+          const items = Array.from(xml.querySelectorAll('item, entry')).slice(0, 10);
+          if (items.length === 0) continue;
+
+          return items.map(item => ({
+            title: item.querySelector('title')?.textContent?.trim() || '',
+            link: item.querySelector('link')?.textContent?.trim() ||
+                  item.querySelector('link')?.getAttribute('href') || '#',
+            description: item.querySelector('description')?.textContent ||
+                         item.querySelector('summary')?.textContent || '',
+            pubDate: item.querySelector('pubDate')?.textContent ||
+                     item.querySelector('published')?.textContent || '',
+            thumbnail: item.querySelector('enclosure')?.getAttribute('url') ||
+                       item.querySelector('thumbnail')?.getAttribute('url') || '',
+            feedUrl: url
+          }));
+        } catch(e) {
+          console.warn('Proxy failed:', proxy, e.message);
+          continue;
+        }
       }
+      return [];
     }
 
     async function loadNews(filter) {
