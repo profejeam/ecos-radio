@@ -849,6 +849,57 @@
       opacity: 0.3;
     }
 
+    /* ── NEWS FILTERS ── */
+    .news-filters {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+    }
+
+    .news-filter-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: rgba(232,232,240,0.6);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      padding: 8px 20px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .news-filter-btn:hover {
+      border-color: var(--blue);
+      color: var(--blue);
+    }
+
+    .news-filter-btn.active {
+      background: linear-gradient(135deg, var(--blue), var(--magenta));
+      border-color: transparent;
+      color: #fff;
+    }
+
+    .news-spinner {
+      width: 40px; height: 40px;
+      border: 3px solid rgba(74,159,212,0.2);
+      border-top-color: var(--blue);
+      border-radius: 50%;
+      margin: 0 auto;
+      animation: spin-loader 0.8s linear infinite;
+    }
+
+    @keyframes spin-loader {
+      to { transform: rotate(360deg); }
+    }
+
+    .news-error {
+      text-align: center;
+      padding: 60px 20px;
+      color: rgba(232,232,240,0.4);
+      font-size: 14px;
+    }
+
     /* ── RESPONSIVE ── */
     @media (max-width: 900px) {
       header { padding: 0 20px; }
@@ -1071,50 +1122,26 @@
   <section id="noticias">
     <div class="section-label">📰 Actualidad</div>
     <h2 class="section-title">Últimas Noticias</h2>
-    <div class="news-layout">
 
-      <div class="news-featured">
-        <div class="news-featured-img">🌟</div>
-        <div class="news-featured-body">
-          <span class="news-tag">Destacado</span>
-          <div class="news-featured-title">Festival de Alabanza 2026: Miles se congregan en el parque central</div>
-          <div class="news-featured-excerpt">Una multitud de fieles se reunió en el evento más esperado del año para celebrar con música, oración y comunidad. La emisora transmitió en vivo todo el evento durante doce horas continuas.</div>
-          <div class="news-date">2 de marzo, 2026</div>
-        </div>
-      </div>
+    <!-- Filtros -->
+    <div class="news-filters">
+      <button class="news-filter-btn active" onclick="loadNews('all')">Todas</button>
+      <button class="news-filter-btn" onclick="loadNews('colombia')">🇨🇴 Colombia</button>
+      <button class="news-filter-btn" onclick="loadNews('religion')">✝️ Fe y Religión</button>
+    </div>
 
-      <div class="news-small">
-        <div class="news-small-icon">✝️</div>
-        <div>
-          <div class="news-small-title">Nueva campaña de misiones llega a cinco departamentos del país</div>
-          <div class="news-small-date">1 de marzo, 2026</div>
-        </div>
-      </div>
+    <!-- Estado de carga -->
+    <div id="news-loading" style="text-align:center; padding:60px 0; color:rgba(232,232,240,0.4);">
+      <div class="news-spinner"></div>
+      <p style="margin-top:16px; font-size:14px;">Cargando noticias...</p>
+    </div>
 
-      <div class="news-small">
-        <div class="news-small-icon">🎵</div>
-        <div>
-          <div class="news-small-title">Álbum de adoración grabado en vivo desde nuestra cabina ya disponible</div>
-          <div class="news-small-date">28 de febrero, 2026</div>
-        </div>
-      </div>
+    <!-- Contenedor de noticias -->
+    <div class="news-layout" id="news-container" style="display:none;"></div>
 
-      <div class="news-small">
-        <div class="news-small-icon">📡</div>
-        <div>
-          <div class="news-small-title">Ecos 95.7 FM lanza nueva app para escuchar desde cualquier dispositivo</div>
-          <div class="news-small-date">25 de febrero, 2026</div>
-        </div>
-      </div>
-
-      <div class="news-small">
-        <div class="news-small-icon">🌍</div>
-        <div>
-          <div class="news-small-title">Jornada de oración internacional une a oyentes de 12 países</div>
-          <div class="news-small-date">20 de febrero, 2026</div>
-        </div>
-      </div>
-
+    <!-- Botón ver más -->
+    <div style="text-align:center; margin-top:36px; display:none;" id="news-more-btn">
+      <a href="#" class="btn-secondary" onclick="loadMoreNews(event)">Ver más noticias →</a>
     </div>
   </section>
 
@@ -1335,7 +1362,141 @@
       requestAnimationFrame(animateProgress);
     }
 
-    // Smooth scroll active nav
+    // ── NOTICIAS DINÁMICAS ──
+    const RSS_PROXY = 'https://api.rss2json.com/v1/api.json?rss_url=';
+
+    const FEEDS = {
+      colombia: [
+        'https://www.eltiempo.com/rss/colombia.xml',
+        'https://www.semana.com/rss/noticias.xml',
+      ],
+      religion: [
+        'https://www.vaticannews.va/es.rss.xml',
+        'https://www.aciprensa.com/feed',
+      ]
+    };
+
+    let allNews = [];
+    let currentFilter = 'all';
+    let visibleCount = 5;
+
+    function formatDate(dateStr) {
+      try {
+        const d = new Date(dateStr);
+        return d.toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' });
+      } catch(e) { return dateStr || ''; }
+    }
+
+    function truncate(text, max) {
+      if (!text) return '';
+      const clean = text.replace(/<[^>]+>/g, '');
+      return clean.length > max ? clean.slice(0, max) + '...' : clean;
+    }
+
+    function tagForFeed(url) {
+      if (url.includes('vatican') || url.includes('aciprensa')) return { label: 'Fe', icon: '✝️', color: 'var(--magenta)' };
+      if (url.includes('eltiempo')) return { label: 'El Tiempo', icon: '📰', color: 'var(--blue)' };
+      if (url.includes('semana')) return { label: 'Semana', icon: '📰', color: 'var(--gold)' };
+      return { label: 'Noticias', icon: '📰', color: 'var(--blue)' };
+    }
+
+    async function fetchFeed(url) {
+      try {
+        const res = await fetch(RSS_PROXY + encodeURIComponent(url) + '&count=10&api_key=wbcljnxrqhm7zzuadpyxmthyyjjkihpcuyjhkbz');
+        const data = await res.json();
+        if (data.status === 'ok' && data.items) {
+          return data.items.map(item => ({ ...item, feedUrl: url }));
+        }
+        return [];
+      } catch(e) { return []; }
+    }
+
+    async function loadNews(filter) {
+      currentFilter = filter;
+      visibleCount = 5;
+
+      // Update active button
+      document.querySelectorAll('.news-filter-btn').forEach(b => b.classList.remove('active'));
+      event && event.target && event.target.classList.add('active');
+
+      // Show loader
+      document.getElementById('news-loading').style.display = 'block';
+      document.getElementById('news-container').style.display = 'none';
+      document.getElementById('news-more-btn').style.display = 'none';
+
+      // Fetch feeds
+      let feeds = [];
+      if (filter === 'all' || filter === 'colombia') feeds = [...feeds, ...FEEDS.colombia];
+      if (filter === 'all' || filter === 'religion') feeds = [...feeds, ...FEEDS.religion];
+
+      const results = await Promise.all(feeds.map(fetchFeed));
+      allNews = results.flat().sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+
+      document.getElementById('news-loading').style.display = 'none';
+      renderNews();
+    }
+
+    function renderNews() {
+      const container = document.getElementById('news-container');
+      const visible = allNews.slice(0, visibleCount);
+
+      if (visible.length === 0) {
+        container.innerHTML = '<div class="news-error">😕 No se pudieron cargar las noticias.<br>Intenta de nuevo más tarde.</div>';
+        container.style.display = 'block';
+        return;
+      }
+
+      const featured = visible[0];
+      const smalls = visible.slice(1);
+      const ftag = tagForFeed(featured.feedUrl || '');
+
+      let html = `
+        <div class="news-featured" onclick="window.open('${featured.link}','_blank')" style="cursor:pointer;">
+          <div class="news-featured-img" style="background: linear-gradient(135deg, #0d1a3a, #1a2060);">
+            ${featured.thumbnail ? `<img src="${featured.thumbnail}" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='🌟'"/>` : '🌟'}
+          </div>
+          <div class="news-featured-body">
+            <span class="news-tag" style="border-color:${ftag.color};color:${ftag.color};">${ftag.icon} ${ftag.label}</span>
+            <div class="news-featured-title">${featured.title || ''}</div>
+            <div class="news-featured-excerpt">${truncate(featured.description || featured.content || '', 180)}</div>
+            <div class="news-date">${formatDate(featured.pubDate)}</div>
+          </div>
+        </div>`;
+
+      smalls.forEach(item => {
+        const stag = tagForFeed(item.feedUrl || '');
+        html += `
+        <div class="news-small" onclick="window.open('${item.link}','_blank')" style="cursor:pointer;">
+          <div class="news-small-icon" style="background:linear-gradient(135deg,rgba(74,159,212,0.2),rgba(176,58,140,0.2))">${stag.icon}</div>
+          <div>
+            <div class="news-small-title">${item.title || ''}</div>
+            <div class="news-small-date" style="color:${stag.color};margin-bottom:2px;font-size:10px;">${stag.label}</div>
+            <div class="news-small-date">${formatDate(item.pubDate)}</div>
+          </div>
+        </div>`;
+      });
+
+      container.innerHTML = html;
+      container.style.display = 'grid';
+
+      // Show "ver más" if there are more
+      const moreBtn = document.getElementById('news-more-btn');
+      moreBtn.style.display = allNews.length > visibleCount ? 'block' : 'none';
+    }
+
+    function loadMoreNews(e) {
+      e.preventDefault();
+      visibleCount += 4;
+      renderNews();
+    }
+
+    // Auto-refresh every 10 minutes
+    loadNews('all');
+    setInterval(() => loadNews(currentFilter), 10 * 60 * 1000);
+
+    // ── FIN NOTICIAS ──
+
+
     const sections = document.querySelectorAll('section[id], div[id="top-songs"]');
     const navLinks = document.querySelectorAll('nav a');
 
