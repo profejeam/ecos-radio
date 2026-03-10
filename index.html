@@ -1363,16 +1363,14 @@
     }
 
     // ── NOTICIAS DINÁMICAS ──
-    const RSS_PROXY = 'https://api.rss2json.com/v1/api.json?rss_url=';
-
     const FEEDS = {
       colombia: [
-        'https://www.eltiempo.com/rss/colombia.xml',
-        'https://www.semana.com/rss/noticias.xml',
+        'https://feeds.bbci.co.uk/mundo/rss.xml',
+        'https://www.elcolombiano.com/googlenews.xml',
       ],
       religion: [
-        'https://www.vaticannews.va/es.rss.xml',
         'https://www.aciprensa.com/feed',
+        'https://www.vaticannews.va/es.rss.xml',
       ]
     };
 
@@ -1395,20 +1393,37 @@
 
     function tagForFeed(url) {
       if (url.includes('vatican') || url.includes('aciprensa')) return { label: 'Fe', icon: '✝️', color: 'var(--magenta)' };
-      if (url.includes('eltiempo')) return { label: 'El Tiempo', icon: '📰', color: 'var(--blue)' };
-      if (url.includes('semana')) return { label: 'Semana', icon: '📰', color: 'var(--gold)' };
+      if (url.includes('bbc')) return { label: 'BBC Mundo', icon: '🌎', color: 'var(--blue)' };
+      if (url.includes('elcolombiano')) return { label: 'El Colombiano', icon: '🇨🇴', color: 'var(--gold)' };
       return { label: 'Noticias', icon: '📰', color: 'var(--blue)' };
     }
 
     async function fetchFeed(url) {
+      // Use allorigins as CORS proxy to parse RSS
+      const proxy = 'https://api.allorigins.win/get?url=' + encodeURIComponent(url);
       try {
-        const res = await fetch(RSS_PROXY + encodeURIComponent(url) + '&count=10&api_key=wbcljnxrqhm7zzuadpyxmthyyjjkihpcuyjhkbz');
+        const res = await fetch(proxy);
         const data = await res.json();
-        if (data.status === 'ok' && data.items) {
-          return data.items.map(item => ({ ...item, feedUrl: url }));
-        }
+        if (!data.contents) return [];
+
+        // Parse XML
+        const parser = new DOMParser();
+        const xml = parser.parseFromString(data.contents, 'text/xml');
+        const items = Array.from(xml.querySelectorAll('item')).slice(0, 10);
+
+        return items.map(item => ({
+          title: item.querySelector('title')?.textContent || '',
+          link: item.querySelector('link')?.textContent || item.querySelector('guid')?.textContent || '#',
+          description: item.querySelector('description')?.textContent || '',
+          pubDate: item.querySelector('pubDate')?.textContent || '',
+          thumbnail: item.querySelector('enclosure')?.getAttribute('url') ||
+                     item.querySelector('thumbnail')?.getAttribute('url') || '',
+          feedUrl: url
+        }));
+      } catch(e) {
+        console.warn('Feed error:', url, e);
         return [];
-      } catch(e) { return []; }
+      }
     }
 
     async function loadNews(filter) {
