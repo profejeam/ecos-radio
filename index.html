@@ -1432,48 +1432,38 @@
         return;
       }
 
-      // iTunes previews are on audio-ssl.itunes.apple.com — allow direct play
-      // They support CORS natively
+      // Play directly on user click — no deferred events
       currentPreview = new Audio(previewUrl);
-      currentPreview.crossOrigin = 'anonymous';
       currentPreview.volume = audio ? audio.volume : 0.8;
+      currentPreviewBtn = cardEl;
 
-      currentPreview.addEventListener('canplay', () => {
-        currentPreview.play().catch(err => {
-          console.warn('Preview error:', err);
-          // Open in new tab as fallback
-          window.open(previewUrl, '_blank');
-        });
+      // Play immediately (we ARE inside a user gesture here)
+      currentPreview.play().then(() => {
+        cardEl.style.borderColor = 'rgba(74,159,212,0.6)';
+        const btn = cardEl.querySelector('.song-play');
+        if (btn) {
+          btn.querySelector('svg path').setAttribute('d', 'M6 19h4V5H6v14zm8-14v14h4V5h-4z');
+          btn.style.opacity = '1';
+        }
+        updateInfo(name, artist + ' · Vista previa 30s');
+      }).catch(() => {
+        currentPreview = null;
+        currentPreviewBtn = null;
       });
 
-      currentPreview.addEventListener('error', (e) => {
-        console.warn('Preview load error:', e);
+      currentPreview.onended = () => {
         cardEl.style.borderColor = '';
         const btn = cardEl.querySelector('.song-play');
         if (btn) { btn.querySelector('svg path').setAttribute('d', 'M8 5v14l11-7z'); btn.style.opacity = ''; }
         currentPreview = null;
         currentPreviewBtn = null;
-      });
+        updateInfo('Ecos 95.7 FM · En Vivo', isPlaying ? 'En directo 🔴' : 'Click ▶ para escuchar en vivo');
+      };
 
-      currentPreview.load();
-      currentPreviewBtn = cardEl;
-
-      cardEl.style.borderColor = 'rgba(74,159,212,0.6)';
-      const btn = cardEl.querySelector('.song-play');
-      if (btn) {
-        btn.querySelector('svg path').setAttribute('d', 'M6 19h4V5H6v14zm8-14v14h4V5h-4z');
-        btn.style.opacity = '1';
-      }
-
-      // Update player info
-      updateInfo(name, artist + ' · Vista previa iTunes');
-
-      currentPreview.onended = () => {
+      currentPreview.onerror = () => {
         cardEl.style.borderColor = '';
-        if (btn) { btn.querySelector('svg path').setAttribute('d', 'M8 5v14l11-7z'); btn.style.opacity = ''; }
         currentPreview = null;
         currentPreviewBtn = null;
-        updateInfo('Ecos 95.7 FM · En Vivo', isPlaying ? 'En directo 🔴' : 'Click ▶ para escuchar en vivo');
       };
     }
 
