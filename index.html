@@ -1608,7 +1608,8 @@
         <div class="news-featured" onclick="window.open('${featured.link}','_blank')" style="cursor:pointer;">
           <div class="news-featured-img" style="background:${fph.bg}; overflow:hidden; position:relative;">
             ${featured.thumbnail
-              ? `<img src="${featured.thumbnail}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" onerror="this.style.display='none'"/><span style="position:relative;z-index:1;font-size:64px;">${fph.icon}</span>`
+              ? `<img src="${featured.thumbnail}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+                 <span style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;font-size:64px;z-index:1;">${fph.icon}</span>`
               : `<span style="font-size:64px;">${fph.icon}</span>`
             }
           </div>
@@ -1627,7 +1628,8 @@
         <div class="news-small" onclick="window.open('${item.link}','_blank')" style="cursor:pointer;">
           <div class="news-small-thumb" style="background:${sph.bg}; width:72px; height:72px; border-radius:10px; flex-shrink:0; overflow:hidden; display:flex; align-items:center; justify-content:center; font-size:24px; position:relative;">
             ${item.thumbnail
-              ? `<img src="${item.thumbnail}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" onerror="this.style.display='none'"/><span style="position:relative;z-index:1;">${sph.icon}</span>`
+              ? `<img src="${item.thumbnail}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+                 <span style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;">${sph.icon}</span>`
               : sph.icon
             }
           </div>
