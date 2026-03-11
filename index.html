@@ -1191,11 +1191,22 @@
       </div>
 
       <div class="contact-form">
-        <input type="text" placeholder="Tu nombre" />
-        <input type="email" placeholder="Tu correo electrónico" />
-        <textarea placeholder="Tu mensaje, petición o dedicatoria…"></textarea>
-        <button class="btn-primary" style="width:100%; justify-content:center" onclick="alert('¡Mensaje enviado! Gracias por escribirnos.')">
-          Enviar Mensaje
+        <input type="text" id="form-name" placeholder="Tu nombre" required />
+        <input type="email" id="form-email" placeholder="Tu correo electrónico" required />
+        <textarea id="form-message" placeholder="Tu mensaje, petición o dedicatoria…" required></textarea>
+
+        <!-- Success message -->
+        <div id="form-success" style="display:none; background:rgba(74,159,212,0.1); border:1px solid rgba(74,159,212,0.4); border-radius:10px; padding:16px; text-align:center; color:#e8e8f0; font-size:14px; margin-bottom:12px;">
+          ✅ ¡Mensaje enviado! Gracias por escribirnos.
+        </div>
+
+        <!-- Error message -->
+        <div id="form-error" style="display:none; background:rgba(255,80,80,0.1); border:1px solid rgba(255,80,80,0.3); border-radius:10px; padding:16px; text-align:center; color:#ff8080; font-size:14px; margin-bottom:12px;">
+          ❌ Hubo un error. Intenta de nuevo.
+        </div>
+
+        <button class="btn-primary" id="form-btn" style="width:100%; justify-content:center;" onclick="submitForm()">
+          <span id="form-btn-text">Enviar Mensaje</span>
         </button>
       </div>
 
@@ -1663,6 +1674,53 @@
 
     const sections = document.querySelectorAll('section[id], div[id="top-songs"]');
     const navLinks = document.querySelectorAll('nav a');
+
+    // ── FORMULARIO FORMSPREE ──
+    async function submitForm() {
+      const name    = document.getElementById('form-name').value.trim();
+      const email   = document.getElementById('form-email').value.trim();
+      const message = document.getElementById('form-message').value.trim();
+      const btn     = document.getElementById('form-btn');
+      const btnText = document.getElementById('form-btn-text');
+      const success = document.getElementById('form-success');
+      const error   = document.getElementById('form-error');
+
+      if (!name || !email || !message) {
+        error.textContent = '⚠️ Por favor completa todos los campos.';
+        error.style.display = 'block';
+        success.style.display = 'none';
+        return;
+      }
+
+      btn.disabled = true;
+      btnText.textContent = 'Enviando...';
+      error.style.display = 'none';
+      success.style.display = 'none';
+
+      try {
+        const res = await fetch('https://formspree.io/f/xjgayqaw', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({ name, email, message })
+        });
+
+        if (res.ok) {
+          success.style.display = 'block';
+          document.getElementById('form-name').value = '';
+          document.getElementById('form-email').value = '';
+          document.getElementById('form-message').value = '';
+        } else {
+          throw new Error('Error');
+        }
+      } catch(e) {
+        error.textContent = '❌ Hubo un error al enviar. Intenta de nuevo.';
+        error.style.display = 'block';
+      }
+
+      btn.disabled = false;
+      btnText.textContent = 'Enviar Mensaje';
+    }
+    // ── FIN FORMULARIO ──
 
     window.addEventListener('scroll', () => {
       let current = '';
