@@ -857,6 +857,7 @@
       gap: 10px;
       margin-bottom: 32px;
       flex-wrap: wrap;
+      max-width: 100%;
     }
 
     .songs-filter-btn {
@@ -869,6 +870,7 @@
       border-radius: 20px;
       cursor: pointer;
       transition: all 0.2s;
+      white-space: nowrap;
     }
 
     .songs-filter-btn:hover {
@@ -1036,10 +1038,10 @@
     <!-- Filtros de búsqueda -->
     <div class="songs-filters">
       <button class="songs-filter-btn active" onclick="searchSongs('musica cristiana', this)">🙌 Cristiana</button>
-      <button class="songs-filter-btn" onclick="searchSongs('worship español', this)">🕊️ Worship</button>
-      <button class="songs-filter-btn" onclick="searchSongs('marcos witt', this)">🎤 Marcos Witt</button>
-      <button class="songs-filter-btn" onclick="searchSongs('tercer cielo', this)">⭐ Tercer Cielo</button>
-      <button class="songs-filter-btn" onclick="searchSongs('averly morillo', this)">🎵 Averly Morillo</button>
+      <button class="songs-filter-btn" onclick="searchSongs('vallenato colombiano', this)">🪗 Vallenato</button>
+      <button class="songs-filter-btn" onclick="searchSongs('salsa colombiana', this)">💃 Salsa</button>
+      <button class="songs-filter-btn" onclick="searchSongs('merengue', this)">🎺 Merengue</button>
+      <button class="songs-filter-btn" onclick="searchSongs('bachata', this)">🎸 Bachata</button>
     </div>
 
     <!-- Loading -->
@@ -1177,7 +1179,7 @@
         </div>
         <div class="contact-item">
           <div class="contact-icon">✉️</div>
-          contacto@ecosradio.com
+          <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="56353938223735223916333539252437323f397835393b">[email&#160;protected]</a>
         </div>
         <div class="contact-item">
           <div class="contact-icon">📻</div>
@@ -1249,7 +1251,7 @@
     </div>
   </div>
 
-  <script>
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
     // ── AUDIO STREAM ──
     const STREAM_URL = 'https://server2.ejeserver.com:8630/stream';
     let isPlaying = false;
