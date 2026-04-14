@@ -854,9 +854,6 @@
 
     /* ── TICKER PATROCINADORES ── */
     .sponsors-ticker-wrap {
-      display: flex;
-      align-items: center;
-      gap: 0;
       background: rgba(255,255,255,0.03);
       border-top: 1px solid var(--border);
       border-bottom: 1px solid var(--border);
@@ -864,35 +861,19 @@
       height: 52px;
     }
 
-    .sponsors-label {
-      font-size: 9px;
-      font-weight: 700;
-      letter-spacing: 3px;
-      color: rgba(232,232,240,0.3);
-      padding: 0 24px;
-      white-space: nowrap;
-      border-right: 1px solid var(--border);
-      height: 100%;
-      display: flex;
-      align-items: center;
-      flex-shrink: 0;
-      background: rgba(0,0,0,0.2);
-    }
-
     .sponsors-track-outer {
-      flex: 1;
       overflow: hidden;
       position: relative;
-      /* fade edges */
-      mask-image: linear-gradient(to right, transparent, black 60px, black calc(100% - 60px), transparent);
-      -webkit-mask-image: linear-gradient(to right, transparent, black 60px, black calc(100% - 60px), transparent);
+      height: 100%;
+      mask-image: linear-gradient(to right, transparent, black 120px, black calc(100% - 120px), transparent);
+      -webkit-mask-image: linear-gradient(to right, transparent, black 120px, black calc(100% - 120px), transparent);
     }
 
     .sponsors-track {
       display: flex;
       align-items: center;
-      gap: 0;
       width: max-content;
+      height: 100%;
       animation: ticker-scroll 28s linear infinite;
     }
 
@@ -901,8 +882,8 @@
     }
 
     @keyframes ticker-scroll {
-      0%   { transform: translateX(0); }
-      100% { transform: translateX(-50%); }
+      0%   { transform: translateX(-50%); }
+      100% { transform: translateX(0); }
     }
 
     .sponsor-item {
@@ -1202,10 +1183,8 @@
 
   <!-- TICKER PATROCINADORES -->
   <div class="sponsors-ticker-wrap">
-    <div class="sponsors-label">PATROCINADORES</div>
     <div class="sponsors-track-outer">
       <div class="sponsors-track" id="sponsors-track">
-        <!-- Logos — duplicados para loop infinito -->
         <div class="sponsor-item">🏪 <span>Tu Negocio</span></div>
         <div class="sponsor-item">🎯 <span>Pauta Aquí</span></div>
         <div class="sponsor-item">📡 <span>Tu Marca</span></div>
