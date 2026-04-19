@@ -1407,6 +1407,12 @@
   <!-- HIDDEN AUDIO ELEMENT -->
   <audio id="radio-audio" preload="none" crossorigin="anonymous"></audio>
 
+  <!-- CASTER.FM WIDGET OFICIAL -->
+  <div style="position:fixed;bottom:80px;left:0;right:0;z-index:199;display:none;" id="caster-widget-wrap">
+    <div data-type="newStreamPlayer" data-publicToken="d96f54cd-9b51-4cca-991b-04d5c53ed547" data-theme="dark" data-color="e81e4d" data-channelId="a1959058-24b2-40d2-9626-d9c5ba104bda" data-rendered="false" class="cstrEmbed"></div>
+  </div>
+  <script src="//cdn.cloud.caster.fm//widgets/embed.js"></script>
+
   <!-- FIXED PLAYER -->
   <div id="player">
     <div class="player-progress-bar" id="progress-bar"></div>
@@ -1440,7 +1446,7 @@
 
   <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
     // ── AUDIO STREAM ──
-    const STREAM_URL = 'https://morcast.caster.fm:14032/96Q2o';
+    const STREAM_URL = 'https://streaming.caster.fm/d96f54cd-9b51-4cca-991b-04d5c53ed547';
     let isPlaying = false;
 
     // Create audio element in HTML for better browser compatibility
