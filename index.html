@@ -707,8 +707,21 @@
     .contact-form input::placeholder,
     .contact-form textarea::placeholder { color: rgba(232,232,240,0.3); }
 
+    /* Ocultar enlaces de Caster.fm */
+    .cstrEmbed > a { display: none !important; }
+
     /* ── PLAYER (fixed footer) ── */
     #player {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      z-index: 200;
+      background: rgba(10,10,18,0.97);
+      backdrop-filter: blur(30px);
+      border-top: 2px solid rgba(176,58,140,0.4);
+      padding: 0;
+      overflow: hidden;
+      height: auto;
+    }
       position: fixed;
       bottom: 0; left: 0; right: 0;
       z-index: 200;
@@ -1408,9 +1421,9 @@
   <audio id="radio-audio" preload="none" crossorigin="anonymous"></audio>
 
   <!-- FIXED PLAYER CON WIDGET OFICIAL CASTER.FM -->
-  <div id="player" style="height:auto; min-height:80px; flex-direction:column; padding:10px 30px;">
+  <div id="player">
     <div class="player-progress-bar" id="progress-bar"></div>
-    <div data-type="newStreamPlayer" data-publicToken="d96f54cd-9b51-4cca-991b-04d5c53ed547" data-theme="dark" data-color="4a9fd4" data-channelId="a1959058-24b2-40d2-9626-d9c5ba104bda" data-rendered="false" class="cstrEmbed" style="width:100%;"></div>
+    <div data-type="newStreamPlayer" data-publicToken="d96f54cd-9b51-4cca-991b-04d5c53ed547" data-theme="dark" data-color="b03a8c" data-channelId="a1959058-24b2-40d2-9626-d9c5ba104bda" data-rendered="false" class="cstrEmbed" style="width:100%;"><a href="https://www.caster.fm">Shoutcast Hosting</a> <a href="https://www.caster.fm">Stream Hosting</a> <a href="https://www.caster.fm">Radio Server Hosting</a></div>
   </div>
   <script src="//cdn.cloud.caster.fm//widgets/embed.js"></script>
 
