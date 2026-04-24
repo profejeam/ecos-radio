@@ -1420,12 +1420,60 @@
   <!-- HIDDEN AUDIO ELEMENT -->
   <audio id="radio-audio" preload="none" crossorigin="anonymous"></audio>
 
-  <!-- FIXED PLAYER CON WIDGET OFICIAL CASTER.FM -->
-  <div id="player">
-    <div class="player-progress-bar" id="progress-bar"></div>
-    <div data-type="newStreamPlayer" data-publicToken="d96f54cd-9b51-4cca-991b-04d5c53ed547" data-theme="dark" data-color="b03a8c" data-channelId="a1959058-24b2-40d2-9626-d9c5ba104bda" data-rendered="false" class="cstrEmbed" style="width:100%;"><a href="https://www.caster.fm">Shoutcast Hosting</a> <a href="https://www.caster.fm">Stream Hosting</a> <a href="https://www.caster.fm">Radio Server Hosting</a></div>
+  <!-- FIXED PLAYER CON WIDGET CASTER.FM DESPLEGABLE -->
+  <div id="player" style="
+    position:fixed; bottom:0; left:0; right:0; z-index:200;
+    background:rgba(10,10,18,0.97);
+    backdrop-filter:blur(30px);
+    border-top:2px solid rgba(176,58,140,0.4);
+    transition: height 0.3s ease;
+    height:48px;
+    overflow:hidden;
+  ">
+    <!-- Barra compacta siempre visible -->
+    <div id="player-bar" style="
+      display:flex; align-items:center; justify-content:space-between;
+      padding:0 20px; height:48px; cursor:pointer;
+    " onclick="togglePlayer()">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <span style="font-size:18px;">📻</span>
+        <div>
+          <div style="font-size:13px; font-weight:600; color:#fff;">Ecos de la Buena Noticia</div>
+          <div style="font-size:11px; color:rgba(255,255,255,0.5);">95.7 FM · En Vivo</div>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px;">
+        <span style="
+          background:linear-gradient(135deg,#4a9fd4,#b03a8c);
+          color:#fff; font-size:10px; font-weight:600;
+          padding:3px 8px; border-radius:20px; letter-spacing:1px;
+        ">● EN VIVO</span>
+        <span id="toggle-icon" style="font-size:18px; color:rgba(255,255,255,0.6); transition:transform 0.3s;">▲</span>
+      </div>
+    </div>
+
+    <!-- Widget de Caster.fm desplegable -->
+    <div id="player-widget" style="padding:0 10px 10px;">
+      <div data-type="newStreamPlayer" data-publicToken="d96f54cd-9b51-4cca-991b-04d5c53ed547" data-theme="dark" data-color="b03a8c" data-channelId="a1959058-24b2-40d2-9626-d9c5ba104bda" data-rendered="false" class="cstrEmbed" style="width:100%;"><a href="https://www.caster.fm">Shoutcast Hosting</a> <a href="https://www.caster.fm">Stream Hosting</a> <a href="https://www.caster.fm">Radio Server Hosting</a></div>
+    </div>
   </div>
   <script src="//cdn.cloud.caster.fm//widgets/embed.js"></script>
+
+  <script>
+    let playerExpanded = false;
+    function togglePlayer() {
+      playerExpanded = !playerExpanded;
+      const player = document.getElementById('player');
+      const icon = document.getElementById('toggle-icon');
+      if (playerExpanded) {
+        player.style.height = '220px';
+        icon.style.transform = 'rotate(180deg)';
+      } else {
+        player.style.height = '48px';
+        icon.style.transform = 'rotate(0deg)';
+      }
+    }
+  </script>
 
   <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
     // ── AUDIO STREAM ──
