@@ -1473,6 +1473,30 @@
         icon.style.transform = 'rotate(0deg)';
       }
     }
+
+    // Conectar botón "Escuchar en Vivo" con el widget de Caster.fm
+    document.getElementById('hero-play-btn').addEventListener('click', function() {
+      // Expandir el player si no está expandido
+      if (!playerExpanded) togglePlayer();
+
+      // Hacer scroll suave al player
+      document.getElementById('player').scrollIntoView({ behavior: 'smooth', block: 'end' });
+
+      // Esperar que el widget cargue y hacer clic en play
+      setTimeout(function() {
+        const iframes = document.querySelectorAll('iframe');
+        iframes.forEach(function(iframe) {
+          try {
+            const playBtn = iframe.contentDocument.querySelector('button, [class*="play"]');
+            if (playBtn) playBtn.click();
+          } catch(e) {}
+        });
+
+        // También intentar con el botón visible del widget
+        const playBtns = document.querySelectorAll('[class*="play"], .cstrEmbed button');
+        playBtns.forEach(function(btn) { try { btn.click(); } catch(e) {} });
+      }, 1500);
+    });
   </script>
 
   <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
