@@ -1511,8 +1511,127 @@
     });
   </script>
   <script>
-    // Load default songs on page load
-    // Load default songs on page load
+    // ── ITUNES API — LO MÁS SONADO ──
+    let currentPreview = null;
+    let currentPreviewBtn = null;
+
+    async function searchSongs(term, btnEl) {
+      document.querySelectorAll('.songs-filter-btn').forEach(b => b.classList.remove('active'));
+      if (btnEl) btnEl.classList.add('active');
+
+      document.getElementById('songs-loading').style.display = 'block';
+      document.getElementById('songs-container').style.display = 'none';
+
+      try {
+        const url = 'https://itunes.apple.com/search?term=' + encodeURIComponent(term) + '&media=music&limit=12&country=CO';
+        const res = await fetch(url);
+        const data = await res.json();
+        renderSongs(data.results || []);
+      } catch(e) {
+        console.warn('iTunes error:', e);
+        document.getElementById('songs-loading').style.display = 'none';
+        document.getElementById('songs-container').innerHTML = '<p style="color:rgba(232,232,240,0.4);font-size:14px;grid-column:1/-1;text-align:center;padding:40px 0;">😕 No se pudieron cargar las canciones.</p>';
+        document.getElementById('songs-container').style.display = 'grid';
+      }
+    }
+
+    function renderSongs(songs) {
+      document.getElementById('songs-loading').style.display = 'none';
+      const container = document.getElementById('songs-container');
+
+      if (!songs.length) {
+        container.innerHTML = '<p style="color:rgba(232,232,240,0.4);font-size:14px;grid-column:1/-1;text-align:center;padding:40px 0;">Sin resultados.</p>';
+        container.style.display = 'grid';
+        return;
+      }
+
+      container.innerHTML = songs.map((song, i) => {
+        const previewUrl = song.previewUrl || '';
+        const name = (song.trackName || '').replace(/'/g, "\'");
+        const artist = (song.artistName || '').replace(/'/g, "\'");
+        return '<div class="song-card" onclick="previewSong('' + previewUrl + '','' + name + '','' + artist + '',this)">' +
+          '<div class="song-rank">' + String(i+1).padStart(2,'0') + '</div>' +
+          '<div class="song-cover" style="background:linear-gradient(135deg,var(--blue),var(--magenta));overflow:hidden;padding:0;">' +
+            (song.artworkUrl100 ? '<img src="' + song.artworkUrl100 + '" style="width:52px;height:52px;border-radius:8px;object-fit:cover;" onerror="this.parentElement.innerHTML='🎵'"/>' : '🎵') +
+          '</div>' +
+          '<div class="song-info">' +
+            '<div class="song-name">' + (song.trackName || '') + '</div>' +
+            '<div class="song-artist">' + (song.artistName || '') + '</div>' +
+          '</div>' +
+          '<button class="song-play" onclick="event.stopPropagation();previewSong('' + previewUrl + '','' + name + '','' + artist + '',this.closest('.song-card'))">' +
+            '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>' +
+          '</button>' +
+        '</div>';
+      }).join('');
+
+      container.style.display = 'grid';
+
+      container.querySelectorAll('.song-card').forEach((el, i) => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(16px)';
+        setTimeout(() => {
+          el.style.transition = 'opacity 0.4s ease, transform 0.4s ease, border-color 0.25s';
+          el.style.opacity = '1';
+          el.style.transform = 'translateY(0)';
+        }, i * 60);
+      });
+    }
+
+    function previewSong(previewUrl, name, artist, cardEl) {
+      if (currentPreview) {
+        currentPreview.pause();
+        currentPreview.src = '';
+        if (currentPreviewBtn) {
+          var oldPath = currentPreviewBtn.querySelector('.song-play svg path');
+          if (oldPath) oldPath.setAttribute('d', 'M8 5v14l11-7z');
+          var oldBtn = currentPreviewBtn.querySelector('.song-play');
+          if (oldBtn) oldBtn.style.opacity = '';
+          currentPreviewBtn.style.borderColor = '';
+        }
+        var wasSame = currentPreviewBtn === cardEl;
+        currentPreview = null;
+        currentPreviewBtn = null;
+        if (wasSame) return;
+      }
+
+      if (!previewUrl) {
+        if (typeof isPlaying !== 'undefined' && !isPlaying) startStream();
+        return;
+      }
+
+      currentPreview = new Audio(previewUrl);
+      currentPreview.volume = 0.8;
+      currentPreviewBtn = cardEl;
+
+      currentPreview.play().then(function() {
+        cardEl.style.borderColor = 'rgba(74,159,212,0.6)';
+        var btn = cardEl.querySelector('.song-play');
+        if (btn) {
+          btn.querySelector('svg path').setAttribute('d', 'M6 19h4V5H6v14zm8-14v14h4V5h-4z');
+          btn.style.opacity = '1';
+        }
+        if (typeof updateInfo === 'function') updateInfo(name, artist + ' · Vista previa 30s');
+      }).catch(function(e) {
+        currentPreview = null;
+        currentPreviewBtn = null;
+      });
+
+      currentPreview.onended = function() {
+        cardEl.style.borderColor = '';
+        var btn = cardEl.querySelector('.song-play');
+        if (btn) { btn.querySelector('svg path').setAttribute('d', 'M8 5v14l11-7z'); btn.style.opacity = ''; }
+        currentPreview = null;
+        currentPreviewBtn = null;
+        if (typeof updateInfo === 'function') updateInfo('Ecos 95.7 FM · En Vivo', typeof isPlaying !== 'undefined' && isPlaying ? 'En directo 🔴' : 'Click ▶ para escuchar en vivo');
+      };
+
+      currentPreview.onerror = function() {
+        cardEl.style.borderColor = '';
+        currentPreview = null;
+        currentPreviewBtn = null;
+      };
+    }
+
     searchSongs('musica cristiana en español', null);
     // ── FIN ITUNES ──
 
@@ -1523,8 +1642,8 @@
         'https://feeds.bbci.co.uk/mundo/rss.xml',
       ],
       religion: [
-        'https://feeds.bbci.co.uk/mundo/rss.xml',
         'https://feeds.bbci.co.uk/mundo/america_latina/rss.xml',
+        'https://feeds.bbci.co.uk/mundo/rss.xml',
       ]
     };
 
