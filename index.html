@@ -1515,155 +1515,128 @@
     let currentPreview = null;
     let currentPreviewBtn = null;
 
-    // ── CANCIONES POR GÉNERO ──
-    const SONGS_DB = {
-      cristiana: [
-        ['Grande y Poderoso','Marcos Witt'],['Tu Fidelidad','Marcos Witt'],
-        ['Renuévame','Marco Barrientos'],['En Espíritu y en Verdad','Averly Morillo'],
-        ['Bendito el Nombre','Tercer Cielo'],['Gozo Inefable','Evan Craft'],
-        ['La Bondad de Dios','Elevation Worship'],['Maravilloso','Christine D Clario'],
-        ['Santo','Generación 12'],['Mil Gracias','Redimi2'],
-        ['Eres Todo','Jesús Adrián Romero'],['Cuán Grande es Él','Marcos Witt'],
-      ],
-      vallenato: [
-        ['La Bicicleta','Carlos Vives & Shakira'],['Volví a Nacer','Carlos Vives'],
-        ['El Amor de Mi Tierra','Carlos Vives'],['Fruta Fresca','Carlos Vives'],
-        ['A Dónde Va el Amor','Silvestre Dangond'],['Cásate Conmigo','Silvestre Dangond'],
-        ['La Gota Fría','Carlos Vives'],['El Rock del Mañana','Carlos Vives'],
-        ['Cuando Nos Volvamos a Ver','Carlos Vives'],['La Quiero a Morir','Carlos Vives'],
-        ['El Mar de Sus Ojos','Silvestre Dangond'],['Como Nadie','Silvestre Dangond'],
-      ],
-      salsa: [
-        ['Cali Pachanguero','Grupo Niche'],['Una Aventura','Grupo Niche'],
-        ['Que Nadie Sepa Mi Sufrir','Grupo Niche'],['La Rebelión','Joe Arroyo'],
-        ['En Barranquilla Me Quedo','Joe Arroyo'],['No Le Pegue a la Negra','Joe Arroyo'],
-        ['A Lado y Lado','Grupo Niche'],['Buenaventura y Caney','Grupo Niche'],
-        ['Etnia','Joe Arroyo'],['Colombia Tierra Querida','Lucho Bermúdez'],
-        ['Teje y Maneje','Grupo Niche'],['El Año Viejo','Joe Arroyo'],
-      ],
-      merengue: [
-        ['Suavemente','Elvis Crespo'],['La Bilirrubina','Juan Luis Guerra'],
-        ['Ojalá Que Llueva Café','Juan Luis Guerra'],['A Pedir Su Mano','Juan Luis Guerra'],
-        ['Abusadora','Wilfrido Vargas'],['El Africano','Wilfrido Vargas'],
-        ['Tu Sonrisa','Elvis Crespo'],['Perdoname','Olga Tañón'],
-        ['Nuestro Amor Eterno','Olga Tañón'],['Frío Frío','Juan Luis Guerra'],
-        ['Visa para un Sueño','Juan Luis Guerra'],['El Tiburón','Chichi Peralta'],
-      ],
-      bachata: [
-        ['Propuesta Indecente','Romeo Santos'],['Eres Mía','Romeo Santos'],
-        ['Darte un Beso','Prince Royce'],['Obsesión','Aventura'],
-        ['Un Año','Prince Royce'],['Mi Corazoncito','Aventura'],
-        ['Stand by Me','Prince Royce'],['Cuando Volverás','Romeo Santos'],
-        ['Loco','Enrique Iglesias ft. Romeo Santos'],['El Amante','Nicky Jam'],
-        ['Perder la Cabeza','Shakira & Prince Royce'],['Imitadora','Romeo Santos'],
-      ]
-    };
-
-    const GRADS = [
-      'linear-gradient(135deg,#0d1a3a,#1a3a7a)',
-      'linear-gradient(135deg,#2d0d40,#6a1a80)',
-      'linear-gradient(135deg,#0d2a1a,#1a5a30)',
-      'linear-gradient(135deg,#3a1a0d,#7a3a1a)',
-      'linear-gradient(135deg,#1a1a3a,#3a2a60)',
-      'linear-gradient(135deg,#2a0d1a,#6a1a40)',
-    ];
-    const ICONS2 = ['🎵','🎶','🎤','🎸','🥁','🎺','🎼','🙌','✝️','⭐','🎙️','🎧'];
-
-    function searchSongs(term, btnEl) {
+    async function searchSongs(term, btnEl) {
+      // Update active button
       document.querySelectorAll('.songs-filter-btn').forEach(b => b.classList.remove('active'));
       if (btnEl) btnEl.classList.add('active');
-      document.getElementById('songs-loading').style.display = 'none';
 
-      let key = 'cristiana';
-      if (term.includes('vallenato')) key = 'vallenato';
-      else if (term.includes('salsa')) key = 'salsa';
-      else if (term.includes('merengue')) key = 'merengue';
-      else if (term.includes('bachata')) key = 'bachata';
+      document.getElementById('songs-loading').style.display = 'block';
+      document.getElementById('songs-container').style.display = 'none';
 
-      renderSongs(SONGS_DB[key]);
+      try {
+        // iTunes API supports CORS directly — no proxy needed
+        const url = `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&media=music&limit=12&country=CO`;
+        const res = await fetch(url);
+        const data = await res.json();
+        renderSongs(data.results || []);
+      } catch(e) {
+        console.warn('iTunes error:', e);
+        document.getElementById('songs-loading').style.display = 'none';
+        document.getElementById('songs-container').innerHTML = '<p style="color:rgba(232,232,240,0.4);font-size:14px;grid-column:1/-1;text-align:center;padding:40px 0;">😕 No se pudieron cargar las canciones. Intenta de nuevo.</p>';
+        document.getElementById('songs-container').style.display = 'grid';
+      }
     }
 
     function renderSongs(songs) {
       document.getElementById('songs-loading').style.display = 'none';
       const container = document.getElementById('songs-container');
-      if (!songs || !songs.length) { container.style.display = 'grid'; return; }
 
-      container.innerHTML = songs.map((song, i) => {
-        const name = song[0]; const artist = song[1];
-        const query = encodeURIComponent(name + ' ' + artist);
-        const link = 'https://www.youtube.com/results?search_query=' + query;
-        return '<div class="song-card" onclick="window.open('' + link + '','_blank')">' +
-          '<div class="song-rank">' + String(i+1).padStart(2,'0') + '</div>' +
-          '<div class="song-cover" style="background:' + GRADS[i%GRADS.length] + ';display:flex;align-items:center;justify-content:center;font-size:22px;">' + ICONS2[i%ICONS2.length] + '</div>' +
-          '<div class="song-info"><div class="song-name">' + name + '</div><div class="song-artist">' + artist + '</div></div>' +
-          '<button class="song-play" onclick="event.stopPropagation();window.open('' + link + '','_blank')">' +
-            '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>' +
-        '</div>';
-      }).join('');
+      if (!songs.length) {
+        container.innerHTML = '<p style="color:rgba(232,232,240,0.4);font-size:14px;grid-column:1/-1;">Sin resultados.</p>';
+        container.style.display = 'grid';
+        return;
+      }
+
+      container.innerHTML = songs.map((song, i) => `
+        <div class="song-card" onclick="previewSong('${song.previewUrl || ''}', '${song.trackName?.replace(/'/g,"\\'")||''}', '${song.artistName?.replace(/'/g,"\\'")||''}', this)">
+          <div class="song-rank">${String(i+1).padStart(2,'0')}</div>
+          <div class="song-cover" style="background:linear-gradient(135deg,var(--blue),var(--magenta));overflow:hidden;">
+            ${song.artworkUrl100
+              ? `<img src="${song.artworkUrl100}" alt="${song.trackName}" style="width:52px;height:52px;border-radius:8px;object-fit:cover;" onerror="this.parentElement.innerHTML='🎵'"/>`
+              : '🎵'}
+          </div>
+          <div class="song-info">
+            <div class="song-name">${song.trackName || ''}</div>
+            <div class="song-artist">${song.artistName || ''}</div>
+          </div>
+          <button class="song-play" data-preview="${song.previewUrl||''}" onclick="event.stopPropagation(); previewSong('${song.previewUrl||''}','${song.trackName?.replace(/'/g,"\\'")||''}','${song.artistName?.replace(/'/g,"\\'")||''}', this.closest('.song-card'))">
+            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          </button>
+        </div>
+      `).join('');
 
       container.style.display = 'grid';
+
+      // Animate cards
       container.querySelectorAll('.song-card').forEach((el, i) => {
-        el.style.opacity = '0'; el.style.transform = 'translateY(16px)';
-        setTimeout(() => { el.style.transition = 'opacity 0.4s ease, transform 0.4s ease, border-color 0.25s'; el.style.opacity = '1'; el.style.transform = 'translateY(0)'; }, i * 60);
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(16px)';
+        setTimeout(() => {
+          el.style.transition = 'opacity 0.4s ease, transform 0.4s ease, border-color 0.25s';
+          el.style.opacity = '1';
+          el.style.transform = 'translateY(0)';
+        }, i * 60);
       });
     }
 
     function previewSong(previewUrl, name, artist, cardEl) {
+      // Stop current preview
       if (currentPreview) {
         currentPreview.pause();
         currentPreview.src = '';
         if (currentPreviewBtn) {
-          var oldPath = currentPreviewBtn.querySelector('.song-play svg path');
-          if (oldPath) oldPath.setAttribute('d', 'M8 5v14l11-7z');
-          var oldBtn = currentPreviewBtn.querySelector('.song-play');
-          if (oldBtn) oldBtn.style.opacity = '';
+          currentPreviewBtn.querySelector('.song-play svg path')?.setAttribute('d', 'M8 5v14l11-7z');
+          currentPreviewBtn.querySelector('.song-play').style.opacity = '';
           currentPreviewBtn.style.borderColor = '';
         }
-        var wasSame = currentPreviewBtn === cardEl;
+        const wasSame = currentPreviewBtn === cardEl;
         currentPreview = null;
         currentPreviewBtn = null;
         if (wasSame) return;
       }
 
       if (!previewUrl) {
-        if (typeof isPlaying !== 'undefined' && !isPlaying) startStream();
+        if (!isPlaying) startStream();
         return;
       }
 
+      // Play directly on user click — no deferred events
       currentPreview = new Audio(previewUrl);
-      currentPreview.volume = 0.8;
+      currentPreview.volume = audio ? audio.volume : 0.8;
       currentPreviewBtn = cardEl;
 
-      currentPreview.play().then(function() {
+      // Play immediately (we ARE inside a user gesture here)
+      currentPreview.play().then(() => {
         cardEl.style.borderColor = 'rgba(74,159,212,0.6)';
-        var btn = cardEl.querySelector('.song-play');
+        const btn = cardEl.querySelector('.song-play');
         if (btn) {
           btn.querySelector('svg path').setAttribute('d', 'M6 19h4V5H6v14zm8-14v14h4V5h-4z');
           btn.style.opacity = '1';
         }
-        if (typeof updateInfo === 'function') updateInfo(name, artist + ' · Vista previa 30s');
-      }).catch(function(e) {
+        updateInfo(name, artist + ' · Vista previa 30s');
+      }).catch(() => {
         currentPreview = null;
         currentPreviewBtn = null;
       });
 
-      currentPreview.onended = function() {
+      currentPreview.onended = () => {
         cardEl.style.borderColor = '';
-        var btn = cardEl.querySelector('.song-play');
+        const btn = cardEl.querySelector('.song-play');
         if (btn) { btn.querySelector('svg path').setAttribute('d', 'M8 5v14l11-7z'); btn.style.opacity = ''; }
         currentPreview = null;
         currentPreviewBtn = null;
-        if (typeof updateInfo === 'function') updateInfo('Ecos 95.7 FM · En Vivo', typeof isPlaying !== 'undefined' && isPlaying ? 'En directo 🔴' : 'Click ▶ para escuchar en vivo');
+        updateInfo('Ecos 95.7 FM · En Vivo', isPlaying ? 'En directo 🔴' : 'Click ▶ para escuchar en vivo');
       };
 
-      currentPreview.onerror = function() {
+      currentPreview.onerror = () => {
         cardEl.style.borderColor = '';
         currentPreview = null;
         currentPreviewBtn = null;
       };
     }
 
-    searchSongs('cristiana', null);
+    // Load default songs on page load
+    searchSongs('musica cristiana en español', null);
     // ── FIN ITUNES ──
 
 
@@ -1673,8 +1646,8 @@
         'https://feeds.bbci.co.uk/mundo/rss.xml',
       ],
       religion: [
-        'https://feeds.bbci.co.uk/mundo/america_latina/rss.xml',
         'https://feeds.bbci.co.uk/mundo/rss.xml',
+        'https://feeds.bbci.co.uk/mundo/america_latina/rss.xml',
       ]
     };
 
@@ -1742,37 +1715,26 @@
       }
     }
 
-    // Noticias de respaldo para mostrar si falla el RSS
-    const FALLBACK_NEWS = [
-      { title: 'Colombia avanza en proyectos de infraestructura vial en la región Caribe', link: 'https://www.google.com/search?q=colombia+infraestructura+caribe', description: 'El gobierno nacional anuncia nuevas inversiones para mejorar la conectividad vial en los departamentos de la Costa Atlántica.', pubDate: new Date().toISOString(), thumbnail: '', feedUrl: 'colombia' },
-      { title: 'Valledupar celebra el Festival de la Leyenda Vallenata con artistas internacionales', link: 'https://www.google.com/search?q=festival+leyenda+vallenata+valledupar', description: 'La capital del Cesar se prepara para uno de los festivales más importantes de Colombia, con la participación de grandes figuras del vallenato.', pubDate: new Date().toISOString(), thumbnail: '', feedUrl: 'colombia' },
-      { title: 'Selección Colombia Sub-20 clasifica a la siguiente ronda del torneo sudamericano', link: 'https://www.google.com/search?q=seleccion+colombia+sub20', description: 'Los jóvenes talentos del fútbol colombiano continúan su camino en el torneo continental con victorias importantes.', pubDate: new Date().toISOString(), thumbnail: '', feedUrl: 'colombia' },
-      { title: 'El Papa Francisco llama a la paz y la reconciliación en América Latina', link: 'https://www.google.com/search?q=papa+francisco+america+latina+paz', description: 'El sumo pontífice hizo un llamado a los líderes de la región para buscar soluciones pacíficas a los conflictos sociales.', pubDate: new Date().toISOString(), thumbnail: '', feedUrl: 'religion' },
-      { title: 'Jornada de oración ecuménica une a miles de fieles en Colombia', link: 'https://www.google.com/search?q=jornada+oracion+ecumenica+colombia', description: 'Diferentes comunidades religiosas se unieron en una jornada de oración por la paz y el bienestar del país.', pubDate: new Date().toISOString(), thumbnail: '', feedUrl: 'religion' },
-    ];
-
     async function loadNews(filter) {
       currentFilter = filter;
       visibleCount = 5;
 
+      // Update active button
       document.querySelectorAll('.news-filter-btn').forEach(b => b.classList.remove('active'));
       event && event.target && event.target.classList.add('active');
 
+      // Show loader
       document.getElementById('news-loading').style.display = 'block';
       document.getElementById('news-container').style.display = 'none';
       document.getElementById('news-more-btn').style.display = 'none';
 
+      // Fetch feeds
       let feeds = [];
       if (filter === 'all' || filter === 'colombia') feeds = [...feeds, ...FEEDS.colombia];
       if (filter === 'all' || filter === 'religion') feeds = [...feeds, ...FEEDS.religion];
 
-      try {
-        const results = await Promise.all(feeds.map(fetchFeed));
-        const fetched = results.flat().sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
-        allNews = fetched.length > 0 ? fetched : FALLBACK_NEWS;
-      } catch(e) {
-        allNews = FALLBACK_NEWS;
-      }
+      const results = await Promise.all(feeds.map(fetchFeed));
+      allNews = results.flat().sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
 
       document.getElementById('news-loading').style.display = 'none';
       renderNews();
