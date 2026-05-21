@@ -1902,5 +1902,29 @@
       observer.observe(el);
     });
   </script>
+  <!-- BURBUJA FLOTANTE PDF -->
+  <a href="manual.pdf" target="_blank" title="Código de Ética y Manual de Estilo 2026" style="
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    z-index: 999;
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, #4a9fd4, #b03a8c);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 20px rgba(176,58,140,0.5);
+    text-decoration: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  " onmouseover="this.style.transform='scale(1.1)';this.style.boxShadow='0 6px 28px rgba(176,58,140,0.7)'"
+     onmouseout="this.style.transform='scale(1)';this.style.boxShadow='0 4px 20px rgba(176,58,140,0.5)'">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 1.5L18.5 9H13V3.5zM6 20V4h5v7h7v9H6z"/>
+      <path d="M8 12h8v1H8zm0 2h8v1H8zm0 2h5v1H8z"/>
+    </svg>
+  </a>
+
 </body>
 </html>
