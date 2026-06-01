@@ -401,15 +401,27 @@
     }
 
     .programs-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      overflow-x: auto;
       gap: 20px;
-      max-width: 500px;
+      padding-bottom: 16px;
+      padding-right: 20px;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(176,58,140,0.4) transparent;
+      width: 100%;
     }
 
     .program-card {
       border-radius: 16px;
       overflow: hidden;
+      min-width: 260px;
+      max-width: 260px;
+      flex-shrink: 0;
+      scroll-snap-align: start;
       background: var(--card-bg);
       border: 1px solid var(--border);
       transition: all 0.3s;
@@ -1293,6 +1305,69 @@
         </div>
       </div>
 
+      <div class="program-card">
+        <div class="program-thumb" style="background: linear-gradient(135deg, #0d1a40, #1a3a8a)">💼</div>
+        <div class="program-body">
+          <div class="program-time">Lun, Mié, Vie · 8:00 AM – 8:30 AM</div>
+          <div class="program-name">Portafolio en Línea</div>
+          <div class="program-desc">Espacio dedicado al emprendimiento y los negocios de Valledupar. Conectamos a los empresarios locales con su comunidad, mostrando productos, servicios y oportunidades de la región.</div>
+        </div>
+      </div>
+
+      <div class="program-card">
+        <div class="program-thumb" style="background: linear-gradient(135deg, #1a0d2a, #4a1a6a)">📰</div>
+        <div class="program-body">
+          <div class="program-time">Jue, Vie, Sáb · 9:00 AM – 9:30 AM</div>
+          <div class="program-name">Actualidad Cesarense</div>
+          <div class="program-desc">El informativo de la mañana con todo lo que pasa en el Cesar. Noticias locales, regionales y nacionales con enfoque comunitario y veraz para comenzar el día bien informado.</div>
+        </div>
+      </div>
+
+      <div class="program-card">
+        <div class="program-thumb" style="background: linear-gradient(135deg, #2a1a0d, #7a4a1a)">🪗</div>
+        <div class="program-body">
+          <div class="program-time">Lun – Vie · 5:00 PM – 6:00 PM</div>
+          <div class="program-name">¡Que Viva el Vallenato!</div>
+          <div class="program-desc">Un homenaje a la música vallenata, patrimonio cultural de la humanidad. Los mejores acordes de ayer y hoy con historias detrás de las canciones y los grandes intérpretes del Cesar.</div>
+        </div>
+      </div>
+
+      <div class="program-card">
+        <div class="program-thumb" style="background: linear-gradient(135deg, #2a0d1a, #7a1a3a)">💃</div>
+        <div class="program-body">
+          <div class="program-time">Domingos · 10:00 AM – 11:30 AM</div>
+          <div class="program-name">Los Duro de la Salsa</div>
+          <div class="program-desc">El mejor espacio salsero de la región. Ritmo, sabor y color con los clásicos y los nuevos talentos de la salsa. Para los que saben gozar y disfrutar la música tropical.</div>
+        </div>
+      </div>
+
+      <div class="program-card">
+        <div class="program-thumb" style="background: linear-gradient(135deg, #1a2a0d, #3a6a1a)">🌅</div>
+        <div class="program-body">
+          <div class="program-time">Sábados · 9:30 AM – 10:00 AM</div>
+          <div class="program-name">En Hora Buena</div>
+          <div class="program-desc">El programa que alegra la mañana con música, entrevistas y entretenimiento. Un espacio positivo para compartir en familia y empezar el día con la mejor actitud.</div>
+        </div>
+      </div>
+
+      <div class="program-card">
+        <div class="program-thumb" style="background: linear-gradient(135deg, #0d1a2a, #1a4a6a)">✝️</div>
+        <div class="program-body">
+          <div class="program-time">Lunes · 7:00 AM – 8:00 AM</div>
+          <div class="program-name">Sendero de Luz</div>
+          <div class="program-desc">Reflexiones espirituales, música cristiana y mensajes de fe para renovar el alma. Un espacio de encuentro con Dios y la comunidad, conducido con amor y esperanza.</div>
+        </div>
+      </div>
+
+      <div class="program-card">
+        <div class="program-thumb" style="background: linear-gradient(135deg, #2a1a2a, #6a1a6a)">🎙️</div>
+        <div class="program-body">
+          <div class="program-time">Mié, Jue, Vie · 9:30 AM – 10:00 AM</div>
+          <div class="program-name">En Cabina con Julio</div>
+          <div class="program-desc">El espacio más cercano a la comunidad. Julio te acompaña en la tarde con música, llamadas de oyentes, opinión y los temas que le interesan a Valledupar.</div>
+        </div>
+      </div>
+
     </div>
   </section>
 
@@ -1848,7 +1923,7 @@
       success.style.display = 'none';
 
       try {
-        const res = await fetch('https://formspree.io/f/xjgayqaw', {
+        const res = await fetch('https://formspree.io/f/meedaayg', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
           body: JSON.stringify({ name, email, message })
