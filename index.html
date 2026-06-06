@@ -1592,15 +1592,13 @@
       document.getElementById('songs-container').style.display = 'none';
 
       try {
-        // Deezer API via proxy CORS para previews confiables
-        const proxyUrl = `https://corsproxy.io/?${encodeURIComponent('https://api.deezer.com/search?q=' + encodeURIComponent(term) + '&limit=12')}`;
-        const res = await fetch(proxyUrl);
+        // iTunes API
+        const url = `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&media=music&limit=12&country=CO`;
+        const res = await fetch(url);
         const data = await res.json();
-        const songs = (data.data || []).map(s => ({
-          trackName: s.title,
-          artistName: s.artist?.name || '',
-          artworkUrl100: s.album?.cover_medium || '',
-          previewUrl: s.preview || ''
+        const songs = (data.results || []).map(s => ({
+          ...s,
+          previewUrl: s.previewUrl ? s.previewUrl.replace('http://', 'https://') : ''
         }));
         renderSongs(songs);
       } catch(e) {
