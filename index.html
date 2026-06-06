@@ -1269,16 +1269,54 @@
     <div class="section-label">♫ Esta semana</div>
     <h2 class="section-title">Lo Más Sonado</h2>
 
-    <iframe
-      title="Top Éxitos Deezer"
-      src="https://widget.deezer.com/widget/dark/playlist/3155776842"
-      width="100%"
-      height="380"
-      frameborder="0"
-      allowtransparency="true"
-      allow="encrypted-media; clipboard-write"
-      style="border-radius:12px; margin-top:16px;">
-    </iframe>
+    <div style="margin-top:16px; border-radius:12px; overflow:hidden; border:1px solid rgba(255,255,255,0.08);">
+
+      <!-- Botones de géneros -->
+      <div style="display:flex; flex-wrap:wrap; background:#1f1f1f; border-bottom:1px solid #333;">
+        <button class="dz-btn activo" onclick="cambiarGenero(event,'catolica')" style="flex:1 1 30%;padding:12px 8px;border:none;background:none;color:#4a9fd4;cursor:pointer;font-weight:bold;font-size:14px;text-align:center;border-bottom:3px solid #4a9fd4;transition:all 0.3s;">Católica</button>
+        <button class="dz-btn" onclick="cambiarGenero(event,'salsa')" style="flex:1 1 30%;padding:12px 8px;border:none;background:none;color:#aaa;cursor:pointer;font-weight:bold;font-size:14px;text-align:center;border-bottom:3px solid transparent;transition:all 0.3s;">Salsa</button>
+        <button class="dz-btn" onclick="cambiarGenero(event,'vallenato')" style="flex:1 1 30%;padding:12px 8px;border:none;background:none;color:#aaa;cursor:pointer;font-weight:bold;font-size:14px;text-align:center;border-bottom:3px solid transparent;transition:all 0.3s;">Vallenato</button>
+        <button class="dz-btn" onclick="cambiarGenero(event,'bachata')" style="flex:1 1 30%;padding:12px 8px;border:none;background:none;color:#aaa;cursor:pointer;font-weight:bold;font-size:14px;text-align:center;border-bottom:3px solid transparent;transition:all 0.3s;">Bachata</button>
+        <button class="dz-btn" onclick="cambiarGenero(event,'merengue')" style="flex:1 1 30%;padding:12px 8px;border:none;background:none;color:#aaa;cursor:pointer;font-weight:bold;font-size:14px;text-align:center;border-bottom:3px solid transparent;transition:all 0.3s;">Merengue</button>
+        <button class="dz-btn" onclick="cambiarGenero(event,'popular')" style="flex:1 1 30%;padding:12px 8px;border:none;background:none;color:#aaa;cursor:pointer;font-weight:bold;font-size:14px;text-align:center;border-bottom:3px solid transparent;transition:all 0.3s;">Popular</button>
+      </div>
+
+      <!-- Reproductores -->
+      <div style="padding:10px; background:#121212;">
+        <div id="dz-catolica" class="dz-panel" style="display:block;">
+          <iframe title="Música Católica" src="https://widget.deezer.com/widget/dark/playlist/5253816404" width="100%" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media; clipboard-write" style="border-radius:8px;"></iframe>
+        </div>
+        <div id="dz-salsa" class="dz-panel" style="display:none;">
+          <iframe title="Salsa" src="https://widget.deezer.com/widget/dark/playlist/1922336821" width="100%" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media; clipboard-write" style="border-radius:8px;"></iframe>
+        </div>
+        <div id="dz-vallenato" class="dz-panel" style="display:none;">
+          <iframe title="Vallenato" src="https://widget.deezer.com/widget/dark/playlist/1479532811" width="100%" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media; clipboard-write" style="border-radius:8px;"></iframe>
+        </div>
+        <div id="dz-bachata" class="dz-panel" style="display:none;">
+          <iframe title="Bachata" src="https://widget.deezer.com/widget/dark/playlist/4491913744" width="100%" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media; clipboard-write" style="border-radius:8px;"></iframe>
+        </div>
+        <div id="dz-merengue" class="dz-panel" style="display:none;">
+          <iframe title="Merengue" src="https://widget.deezer.com/widget/dark/playlist/2126233564" width="100%" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media; clipboard-write" style="border-radius:8px;"></iframe>
+        </div>
+        <div id="dz-popular" class="dz-panel" style="display:none;">
+          <iframe title="Música Popular" src="https://widget.deezer.com/widget/dark/playlist/1815152702" width="100%" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media; clipboard-write" style="border-radius:8px;"></iframe>
+        </div>
+      </div>
+    </div>
+
+    <script>
+    function cambiarGenero(evt, id) {
+      document.querySelectorAll('.dz-panel').forEach(p => p.style.display = 'none');
+      document.querySelectorAll('.dz-btn').forEach(b => {
+        b.style.color = '#aaa';
+        b.style.borderBottom = '3px solid transparent';
+      });
+      document.getElementById('dz-' + id).style.display = 'block';
+      evt.currentTarget.style.color = '#4a9fd4';
+      evt.currentTarget.style.borderBottom = '3px solid #4a9fd4';
+    }
+    </script>
+
   </section>
 
   <div class="gradient-divider"></div>
