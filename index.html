@@ -1269,23 +1269,16 @@
     <div class="section-label">♫ Esta semana</div>
     <h2 class="section-title">Lo Más Sonado</h2>
 
-    <!-- Filtros de búsqueda -->
-    <div class="songs-filters">
-      <button class="songs-filter-btn active" onclick="searchSongs('musica cristiana', this)">🙌 Cristiana</button>
-      <button class="songs-filter-btn" onclick="searchSongs('vallenato colombiano', this)">🪗 Vallenato</button>
-      <button class="songs-filter-btn" onclick="searchSongs('salsa colombiana', this)">💃 Salsa</button>
-      <button class="songs-filter-btn" onclick="searchSongs('merengue', this)">🎺 Merengue</button>
-      <button class="songs-filter-btn" onclick="searchSongs('bachata', this)">🎸 Bachata</button>
-    </div>
-
-    <!-- Loading -->
-    <div id="songs-loading" style="text-align:center;padding:60px 0;color:rgba(232,232,240,0.4);">
-      <div class="news-spinner"></div>
-      <p style="margin-top:16px;font-size:14px;">Cargando canciones...</p>
-    </div>
-
-    <!-- Grid de canciones -->
-    <div class="songs-grid" id="songs-container" style="display:none;"></div>
+    <iframe
+      title="Top Éxitos Deezer"
+      src="https://widget.deezer.com/widget/dark/playlist/3155776842"
+      width="100%"
+      height="380"
+      frameborder="0"
+      allowtransparency="true"
+      allow="encrypted-media; clipboard-write"
+      style="border-radius:12px; margin-top:16px;">
+    </iframe>
   </section>
 
   <div class="gradient-divider"></div>
