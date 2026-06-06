@@ -1592,11 +1592,17 @@
       document.getElementById('songs-container').style.display = 'none';
 
       try {
-        // iTunes API supports CORS directly — no proxy needed
-        const url = `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&media=music&limit=12&country=CO`;
-        const res = await fetch(url);
+        // Deezer API via proxy CORS para previews confiables
+        const proxyUrl = `https://corsproxy.io/?${encodeURIComponent('https://api.deezer.com/search?q=' + encodeURIComponent(term) + '&limit=12')}`;
+        const res = await fetch(proxyUrl);
         const data = await res.json();
-        renderSongs(data.results || []);
+        const songs = (data.data || []).map(s => ({
+          trackName: s.title,
+          artistName: s.artist?.name || '',
+          artworkUrl100: s.album?.cover_medium || '',
+          previewUrl: s.preview || ''
+        }));
+        renderSongs(songs);
       } catch(e) {
         console.warn('iTunes error:', e);
         document.getElementById('songs-loading').style.display = 'none';
