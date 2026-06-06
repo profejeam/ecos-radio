@@ -1668,12 +1668,13 @@
         return;
       }
 
-      // Play directly on user click — no deferred events
-      currentPreview = new Audio(previewUrl);
+      // Convertir HTTP a HTTPS para evitar bloqueo mixed content
+      const secureUrl = previewUrl.replace('http://', 'https://');
+
+      currentPreview = new Audio(secureUrl);
       currentPreview.volume = audio ? audio.volume : 0.8;
       currentPreviewBtn = cardEl;
 
-      // Play immediately (we ARE inside a user gesture here)
       currentPreview.play().then(() => {
         cardEl.style.borderColor = 'rgba(74,159,212,0.6)';
         const btn = cardEl.querySelector('.song-play');
