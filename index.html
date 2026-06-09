@@ -1269,56 +1269,20 @@
     <div class="section-label">♫ Esta semana</div>
     <h2 class="section-title">Lo Más Sonado</h2>
 
-    <div style="margin-top:16px; border-radius:12px; overflow:hidden; border:1px solid rgba(255,255,255,0.08); background:#121212;">
-
-      <!-- Botones de géneros -->
-      <div class="sp-btns" style="display:flex; flex-wrap:wrap; background:#1f1f1f; border-bottom:1px solid #333;">
-        <button class="sp-btn activo" onclick="cambiarSp(event,'sp-catolica')" style="flex:1 1 30%;padding:14px 8px;border:none;background:#121212;color:#1DB954;cursor:pointer;font-weight:bold;font-size:14px;text-align:center;border-bottom:3px solid #1DB954;transition:all 0.3s;">Católica</button>
-        <button class="sp-btn" onclick="cambiarSp(event,'sp-salsa')" style="flex:1 1 30%;padding:14px 8px;border:none;background:none;color:#aaa;cursor:pointer;font-weight:bold;font-size:14px;text-align:center;border-bottom:3px solid transparent;transition:all 0.3s;">Salsa</button>
-        <button class="sp-btn" onclick="cambiarSp(event,'sp-vallenato')" style="flex:1 1 30%;padding:14px 8px;border:none;background:none;color:#aaa;cursor:pointer;font-weight:bold;font-size:14px;text-align:center;border-bottom:3px solid transparent;transition:all 0.3s;">Vallenato</button>
-        <button class="sp-btn" onclick="cambiarSp(event,'sp-bachata')" style="flex:1 1 30%;padding:14px 8px;border:none;background:none;color:#aaa;cursor:pointer;font-weight:bold;font-size:14px;text-align:center;border-bottom:3px solid transparent;transition:all 0.3s;">Bachata</button>
-        <button class="sp-btn" onclick="cambiarSp(event,'sp-merengue')" style="flex:1 1 30%;padding:14px 8px;border:none;background:none;color:#aaa;cursor:pointer;font-weight:bold;font-size:14px;text-align:center;border-bottom:3px solid transparent;transition:all 0.3s;">Merengue</button>
-        <button class="sp-btn" onclick="cambiarSp(event,'sp-popular')" style="flex:1 1 30%;padding:14px 8px;border:none;background:none;color:#aaa;cursor:pointer;font-weight:bold;font-size:14px;text-align:center;border-bottom:3px solid transparent;transition:all 0.3s;">Popular</button>
-      </div>
-
-      <!-- Reproductores Spotify -->
-      <div style="padding:12px; background:#121212;">
-        <div id="sp-catolica" class="sp-panel" style="display:block;">
-          <iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/37i9dQZF1DXcc6T3YtG8p8?utm_source=generator&theme=0" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
-        </div>
-        <div id="sp-salsa" class="sp-panel" style="display:none;">
-          <iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/37i9dQZF1DX8g9m60rUOR8?utm_source=generator&theme=0" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
-        </div>
-        <div id="sp-vallenato" class="sp-panel" style="display:none;">
-          <iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/37i9dQZF1DX6ThpGvUu7X3?utm_source=generator&theme=0" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
-        </div>
-        <div id="sp-bachata" class="sp-panel" style="display:none;">
-          <iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/37i9dQZF1DX8S6967vU67r?utm_source=generator&theme=0" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
-        </div>
-        <div id="sp-merengue" class="sp-panel" style="display:none;">
-          <iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/37i9dQZF1DX2pStWbWog7f?utm_source=generator&theme=0" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
-        </div>
-        <div id="sp-popular" class="sp-panel" style="display:none;">
-          <iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/37i9dQZF1DXclMv9Xv1Gv9?utm_source=generator&theme=0" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
-        </div>
-      </div>
+    <div class="songs-filters">
+      <button class="songs-filter-btn active" onclick="searchSongs('musica cristiana en español', this)">🙌 Cristiana</button>
+      <button class="songs-filter-btn" onclick="searchSongs('vallenato colombiano', this)">🪗 Vallenato</button>
+      <button class="songs-filter-btn" onclick="searchSongs('salsa colombiana', this)">💃 Salsa</button>
+      <button class="songs-filter-btn" onclick="searchSongs('merengue', this)">🎺 Merengue</button>
+      <button class="songs-filter-btn" onclick="searchSongs('bachata', this)">🎸 Bachata</button>
     </div>
 
-    <script>
-    function cambiarSp(evt, id) {
-      document.querySelectorAll('.sp-panel').forEach(p => p.style.display = 'none');
-      document.querySelectorAll('.sp-btn').forEach(b => {
-        b.style.color = '#aaa';
-        b.style.borderBottom = '3px solid transparent';
-        b.style.background = 'none';
-      });
-      document.getElementById(id).style.display = 'block';
-      evt.currentTarget.style.color = '#1DB954';
-      evt.currentTarget.style.borderBottom = '3px solid #1DB954';
-      evt.currentTarget.style.background = '#121212';
-    }
-    </script>
+    <div id="songs-loading" style="text-align:center;padding:60px 0;color:rgba(232,232,240,0.4);">
+      <div class="news-spinner"></div>
+      <p style="margin-top:16px;font-size:14px;">Cargando canciones...</p>
+    </div>
 
+    <div class="songs-grid" id="songs-container" style="display:none;"></div>
   </section>
 
   <div class="gradient-divider"></div>
@@ -1665,7 +1629,8 @@
             <div class="song-artist">${song.artistName || ''}</div>
           </div>
           <button class="song-play" data-preview="${song.previewUrl||''}" onclick="event.stopPropagation(); previewSong('${song.previewUrl||''}','${song.trackName?.replace(/'/g,"\\'")||''}','${song.artistName?.replace(/'/g,"\\'")||''}', this.closest('.song-card'))">
-            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            <svg viewBox="0 0 24 24" style="width:14px;flex-shrink:0;fill:#fff;"><path d="M8 5v14l11-7z"/></svg>
+            <span class="play-label" style="font-size:11px;font-weight:600;letter-spacing:0.5px;">Probar</span>
           </button>
         </div>
       `).join('');
@@ -1693,6 +1658,8 @@
           currentPreviewBtn.querySelector('.song-play svg path')?.setAttribute('d', 'M8 5v14l11-7z');
           currentPreviewBtn.querySelector('.song-play').style.opacity = '';
           currentPreviewBtn.style.borderColor = '';
+          const lbl = currentPreviewBtn.querySelector('.play-label');
+          if (lbl) lbl.textContent = 'Probar';
         }
         const wasSame = currentPreviewBtn === cardEl;
         currentPreview = null;
@@ -1718,6 +1685,8 @@
         if (btn) {
           btn.querySelector('svg path').setAttribute('d', 'M6 19h4V5H6v14zm8-14v14h4V5h-4z');
           btn.style.opacity = '1';
+          const lbl = btn.querySelector('.play-label');
+          if (lbl) lbl.textContent = 'Pausar';
         }
         updateInfo(name, artist + ' · Vista previa 30s');
       }).catch(() => {
@@ -1728,7 +1697,7 @@
       currentPreview.onended = () => {
         cardEl.style.borderColor = '';
         const btn = cardEl.querySelector('.song-play');
-        if (btn) { btn.querySelector('svg path').setAttribute('d', 'M8 5v14l11-7z'); btn.style.opacity = ''; }
+        if (btn) { btn.querySelector('svg path').setAttribute('d', 'M8 5v14l11-7z'); btn.style.opacity = ''; const lbl = btn.querySelector('.play-label'); if (lbl) lbl.textContent = 'Probar'; }
         currentPreview = null;
         currentPreviewBtn = null;
         updateInfo('Ecos 95.7 FM · En Vivo', isPlaying ? 'En directo 🔴' : 'Click ▶ para escuchar en vivo');
