@@ -1668,7 +1668,7 @@
       }
 
       if (!previewUrl) {
-        if (!isPlaying) startStream();
+        // sin preview disponible
         return;
       }
 
@@ -1676,8 +1676,18 @@
       const secureUrl = previewUrl.replace('http://', 'https://');
 
       currentPreview = new Audio(secureUrl);
-      currentPreview.volume = audio ? audio.volume : 0.8;
+      currentPreview.volume = 0.8;
       currentPreviewBtn = cardEl;
+
+      currentPreview.addEventListener('error', (e) => {
+        console.error('Audio error:', e, currentPreview.error);
+        // Intentar sin HTTPS forzado
+        const fallback = new Audio(previewUrl);
+        fallback.volume = currentPreview.volume;
+        fallback.play().then(() => {
+          currentPreview = fallback;
+        }).catch(err => console.error('Fallback error:', err));
+      });
 
       currentPreview.play().then(() => {
         cardEl.style.borderColor = 'rgba(74,159,212,0.6)';
@@ -1688,7 +1698,7 @@
           const lbl = btn.querySelector('.play-label');
           if (lbl) lbl.textContent = 'Pausar';
         }
-        updateInfo(name, artist + ' · Vista previa 30s');
+        try { updateInfo(name, artist + ' · Vista previa 30s'); } catch(e) {}
       }).catch(() => {
         currentPreview = null;
         currentPreviewBtn = null;
@@ -1700,7 +1710,7 @@
         if (btn) { btn.querySelector('svg path').setAttribute('d', 'M8 5v14l11-7z'); btn.style.opacity = ''; const lbl = btn.querySelector('.play-label'); if (lbl) lbl.textContent = 'Probar'; }
         currentPreview = null;
         currentPreviewBtn = null;
-        updateInfo('Ecos 95.7 FM · En Vivo', isPlaying ? 'En directo 🔴' : 'Click ▶ para escuchar en vivo');
+        updateInfo('Ecos 95.7 FM · En Vivo', 'Click ▶ para escuchar en vivo');
       };
 
       currentPreview.onerror = () => {
