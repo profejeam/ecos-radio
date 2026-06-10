@@ -1624,32 +1624,25 @@
         return;
       }
       const secureUrl = previewUrl.replace('http://', 'https://');
-      function playUrl(url, isFallback) {
-        const a = new Audio(url);
-        a.volume = 0.8;
-        _prev = a; _prevCard = cardEl;
-        a.addEventListener('error', () => {
-          if (!isFallback) {
-            playUrl('https://corsproxy.io/?' + encodeURIComponent(secureUrl), true);
-          } else {
-            resetBtn(cardEl); _prev = null; _prevCard = null;
-            const lbl = cardEl.querySelector('.play-label');
-            if (lbl) { lbl.textContent = 'No disponible'; setTimeout(() => { lbl.textContent = 'Probar'; }, 2000); }
-          }
-        });
-        a.addEventListener('ended', () => { resetBtn(cardEl); _prev = null; _prevCard = null; });
-        a.play().then(() => {
-          setPlayingBtn(cardEl);
-          try { updateInfo(name, artist + ' · Vista previa 30s'); } catch(e) {}
-        }).catch(() => {
-          if (!isFallback) {
-            playUrl('https://corsproxy.io/?' + encodeURIComponent(secureUrl), true);
-          } else {
-            resetBtn(cardEl); _prev = null; _prevCard = null;
-          }
-        });
-      }
-      playUrl(secureUrl, false);
+      // Forzar proxy directamente — iTunes bloquea CORS sin proxy
+      const proxied = 'https://corsproxy.io/?' + encodeURIComponent(secureUrl);
+      const a = new Audio(proxied);
+      a.volume = 0.8;
+      _prev = a; _prevCard = cardEl;
+      a.addEventListener('error', () => {
+        resetBtn(cardEl); _prev = null; _prevCard = null;
+        const lbl = cardEl.querySelector('.play-label');
+        if (lbl) { lbl.textContent = 'No disponible'; setTimeout(() => { lbl.textContent = 'Probar'; }, 2000); }
+      });
+      a.addEventListener('ended', () => { resetBtn(cardEl); _prev = null; _prevCard = null; });
+      a.play().then(() => {
+        setPlayingBtn(cardEl);
+        try { updateInfo(name, artist + ' · Vista previa 30s'); } catch(e) {}
+      }).catch(() => {
+        resetBtn(cardEl); _prev = null; _prevCard = null;
+        const lbl = cardEl.querySelector('.play-label');
+        if (lbl) { lbl.textContent = 'No disponible'; setTimeout(() => { lbl.textContent = 'Probar'; }, 2000); }
+      });
     }
 
     async function searchSongs(term, btnEl) {
