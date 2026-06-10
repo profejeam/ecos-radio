@@ -1667,15 +1667,13 @@
         if (wasSame) return;
       }
 
-      if (!previewUrl) {
-        // sin preview disponible
-        return;
-      }
+      if (!previewUrl) return;
 
-      // Convertir HTTP a HTTPS para evitar bloqueo mixed content
+      // Usar proxy para evitar bloqueo CORS de iTunes
       const secureUrl = previewUrl.replace('http://', 'https://');
+      const proxied = 'https://corsproxy.io/?' + encodeURIComponent(secureUrl);
 
-      currentPreview = new Audio(secureUrl);
+      currentPreview = new Audio(proxied);
       currentPreview.volume = 0.8;
       currentPreviewBtn = cardEl;
 
