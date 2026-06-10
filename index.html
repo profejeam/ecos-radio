@@ -1577,19 +1577,89 @@
   </script>
   <script>
     // ── ITUNES API — LO MÁS SONADO ──
-    let currentPreview = null;
-    let currentPreviewBtn = null;
+    let _prev = null, _prevCard = null;
+
+    function resetBtn(card) {
+      if (!card) return;
+      const btn = card.querySelector('.song-play');
+      if (!btn) return;
+      btn.querySelector('svg path').setAttribute('d', 'M8 5v14l11-7z');
+      btn.style.opacity = '';
+      card.style.borderColor = '';
+      const lbl = btn.querySelector('.play-label');
+      if (lbl) lbl.textContent = 'Probar';
+    }
+
+    function setPlayingBtn(card) {
+      if (!card) return;
+      const btn = card.querySelector('.song-play');
+      if (!btn) return;
+      btn.querySelector('svg path').setAttribute('d', 'M6 19h4V5H6v14zm8-14v14h4V5h-4z');
+      btn.style.opacity = '1';
+      card.style.borderColor = 'rgba(74,159,212,0.6)';
+      const lbl = btn.querySelector('.play-label');
+      if (lbl) lbl.textContent = 'Pausar';
+    }
+
+    function previewSong(previewUrl, name, artist, cardEl) {
+      if (_prevCard === cardEl && _prev) {
+        if (!_prev.paused) {
+          _prev.pause();
+          resetBtn(cardEl);
+        } else {
+          _prev.play();
+          setPlayingBtn(cardEl);
+        }
+        return;
+      }
+      if (_prev) {
+        _prev.pause();
+        _prev.src = '';
+        resetBtn(_prevCard);
+        _prev = null; _prevCard = null;
+      }
+      if (!previewUrl) {
+        const lbl = cardEl.querySelector('.play-label');
+        if (lbl) { lbl.textContent = 'Sin preview'; setTimeout(() => { lbl.textContent = 'Probar'; }, 2000); }
+        return;
+      }
+      const secureUrl = previewUrl.replace('http://', 'https://');
+      function playUrl(url, isFallback) {
+        const a = new Audio(url);
+        a.volume = 0.8;
+        _prev = a; _prevCard = cardEl;
+        a.addEventListener('error', () => {
+          if (!isFallback) {
+            playUrl('https://corsproxy.io/?' + encodeURIComponent(secureUrl), true);
+          } else {
+            resetBtn(cardEl); _prev = null; _prevCard = null;
+            const lbl = cardEl.querySelector('.play-label');
+            if (lbl) { lbl.textContent = 'No disponible'; setTimeout(() => { lbl.textContent = 'Probar'; }, 2000); }
+          }
+        });
+        a.addEventListener('ended', () => { resetBtn(cardEl); _prev = null; _prevCard = null; });
+        a.play().then(() => {
+          setPlayingBtn(cardEl);
+          try { updateInfo(name, artist + ' · Vista previa 30s'); } catch(e) {}
+        }).catch(() => {
+          if (!isFallback) {
+            playUrl('https://corsproxy.io/?' + encodeURIComponent(secureUrl), true);
+          } else {
+            resetBtn(cardEl); _prev = null; _prevCard = null;
+          }
+        });
+      }
+      playUrl(secureUrl, false);
+    }
 
     async function searchSongs(term, btnEl) {
-      // Update active button
       document.querySelectorAll('.songs-filter-btn').forEach(b => b.classList.remove('active'));
       if (btnEl) btnEl.classList.add('active');
-
-      document.getElementById('songs-loading').style.display = 'block';
-      document.getElementById('songs-container').style.display = 'none';
-
+      const loading = document.getElementById('songs-loading');
+      const container = document.getElementById('songs-container');
+      if (loading) loading.style.display = 'block';
+      if (container) container.style.display = 'none';
       try {
-        // iTunes API
         const url = `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&media=music&limit=12&country=CO`;
         const res = await fetch(url);
         const data = await res.json();
@@ -1599,128 +1669,45 @@
         }));
         renderSongs(songs);
       } catch(e) {
-        console.warn('iTunes error:', e);
-        document.getElementById('songs-loading').style.display = 'none';
-        document.getElementById('songs-container').innerHTML = '<p style="color:rgba(232,232,240,0.4);font-size:14px;grid-column:1/-1;text-align:center;padding:40px 0;">😕 No se pudieron cargar las canciones. Intenta de nuevo.</p>';
-        document.getElementById('songs-container').style.display = 'grid';
+        if (loading) loading.style.display = 'none';
+        if (container) { container.style.display = 'grid'; container.innerHTML = '<p style="color:rgba(232,232,240,0.4);padding:20px;">Sin resultados.</p>'; }
       }
     }
 
     function renderSongs(songs) {
-      document.getElementById('songs-loading').style.display = 'none';
+      const loading = document.getElementById('songs-loading');
       const container = document.getElementById('songs-container');
-
+      if (loading) loading.style.display = 'none';
+      if (!container) return;
       if (!songs.length) {
-        container.innerHTML = '<p style="color:rgba(232,232,240,0.4);font-size:14px;grid-column:1/-1;">Sin resultados.</p>';
         container.style.display = 'grid';
+        container.innerHTML = '<p style="color:rgba(232,232,240,0.4);padding:20px;">Sin resultados.</p>';
         return;
       }
-
+      container.style.display = 'grid';
       container.innerHTML = songs.map((song, i) => `
-        <div class="song-card" onclick="previewSong('${song.previewUrl || ''}', '${song.trackName?.replace(/'/g,"\\'")||''}', '${song.artistName?.replace(/'/g,"\\'")||''}', this)">
+        <div class="song-card">
           <div class="song-rank">${String(i+1).padStart(2,'0')}</div>
           <div class="song-cover" style="background:linear-gradient(135deg,var(--blue),var(--magenta));overflow:hidden;">
             ${song.artworkUrl100
-              ? `<img src="${song.artworkUrl100}" alt="${song.trackName}" style="width:52px;height:52px;border-radius:8px;object-fit:cover;" onerror="this.parentElement.innerHTML='🎵'"/>`
+              ? `<img src="${song.artworkUrl100}" alt="${(song.trackName||'').replace(/"/g,'')}" style="width:52px;height:52px;border-radius:8px;object-fit:cover;" onerror="this.parentElement.innerHTML='🎵'"/>`
               : '🎵'}
           </div>
           <div class="song-info">
             <div class="song-name">${song.trackName || ''}</div>
             <div class="song-artist">${song.artistName || ''}</div>
           </div>
-          <button class="song-play" data-preview="${song.previewUrl||''}" onclick="event.stopPropagation(); previewSong('${song.previewUrl||''}','${song.trackName?.replace(/'/g,"\\'")||''}','${song.artistName?.replace(/'/g,"\\'")||''}', this.closest('.song-card'))">
+          <button class="song-play" onclick="previewSong('${(song.previewUrl||'').replace(/'/g,"\'")}','${(song.trackName||'').replace(/'/g,"\'")}','${(song.artistName||'').replace(/'/g,"\'")}', this.closest('.song-card'))" style="display:flex;align-items:center;gap:4px;padding:6px 10px;border-radius:20px;min-width:80px;justify-content:center;opacity:1;">
             <svg viewBox="0 0 24 24" style="width:14px;flex-shrink:0;fill:#fff;"><path d="M8 5v14l11-7z"/></svg>
             <span class="play-label" style="font-size:11px;font-weight:600;letter-spacing:0.5px;">Probar</span>
           </button>
         </div>
       `).join('');
-
-      container.style.display = 'grid';
-
-      // Animate cards
-      container.querySelectorAll('.song-card').forEach((el, i) => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(16px)';
-        setTimeout(() => {
-          el.style.transition = 'opacity 0.4s ease, transform 0.4s ease, border-color 0.25s';
-          el.style.opacity = '1';
-          el.style.transform = 'translateY(0)';
-        }, i * 60);
-      });
-    }
-
-    function previewSong(previewUrl, name, artist, cardEl) {
-      // Stop current preview
-      if (currentPreview) {
-        currentPreview.pause();
-        currentPreview.src = '';
-        if (currentPreviewBtn) {
-          currentPreviewBtn.querySelector('.song-play svg path')?.setAttribute('d', 'M8 5v14l11-7z');
-          currentPreviewBtn.querySelector('.song-play').style.opacity = '';
-          currentPreviewBtn.style.borderColor = '';
-          const lbl = currentPreviewBtn.querySelector('.play-label');
-          if (lbl) lbl.textContent = 'Probar';
-        }
-        const wasSame = currentPreviewBtn === cardEl;
-        currentPreview = null;
-        currentPreviewBtn = null;
-        if (wasSame) return;
-      }
-
-      if (!previewUrl) return;
-
-      // Usar proxy para evitar bloqueo CORS de iTunes
-      const secureUrl = previewUrl.replace('http://', 'https://');
-      const proxied = 'https://corsproxy.io/?' + encodeURIComponent(secureUrl);
-
-      currentPreview = new Audio(proxied);
-      currentPreview.volume = 0.8;
-      currentPreviewBtn = cardEl;
-
-      currentPreview.addEventListener('error', (e) => {
-        console.error('Audio error:', e, currentPreview.error);
-        // Intentar sin HTTPS forzado
-        const fallback = new Audio(previewUrl);
-        fallback.volume = currentPreview.volume;
-        fallback.play().then(() => {
-          currentPreview = fallback;
-        }).catch(err => console.error('Fallback error:', err));
-      });
-
-      currentPreview.play().then(() => {
-        cardEl.style.borderColor = 'rgba(74,159,212,0.6)';
-        const btn = cardEl.querySelector('.song-play');
-        if (btn) {
-          btn.querySelector('svg path').setAttribute('d', 'M6 19h4V5H6v14zm8-14v14h4V5h-4z');
-          btn.style.opacity = '1';
-          const lbl = btn.querySelector('.play-label');
-          if (lbl) lbl.textContent = 'Pausar';
-        }
-        try { updateInfo(name, artist + ' · Vista previa 30s'); } catch(e) {}
-      }).catch(() => {
-        currentPreview = null;
-        currentPreviewBtn = null;
-      });
-
-      currentPreview.onended = () => {
-        cardEl.style.borderColor = '';
-        const btn = cardEl.querySelector('.song-play');
-        if (btn) { btn.querySelector('svg path').setAttribute('d', 'M8 5v14l11-7z'); btn.style.opacity = ''; const lbl = btn.querySelector('.play-label'); if (lbl) lbl.textContent = 'Probar'; }
-        currentPreview = null;
-        currentPreviewBtn = null;
-        updateInfo('Ecos 95.7 FM · En Vivo', 'Click ▶ para escuchar en vivo');
-      };
-
-      currentPreview.onerror = () => {
-        cardEl.style.borderColor = '';
-        currentPreview = null;
-        currentPreviewBtn = null;
-      };
     }
 
     // Load default songs on page load
     searchSongs('musica cristiana en español', null);
-    // ── FIN ITUNES ──
+    
 
 
     const FEEDS = {
