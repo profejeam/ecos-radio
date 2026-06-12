@@ -1671,25 +1671,39 @@
       if (loading) loading.style.display = 'block';
       if (container) container.style.display = 'none';
       try {
-        // Mapear términos de búsqueda a Deezer
+        // Buscar en Deezer via API de Claude
         const termMap = {
-          'musica cristiana en español': 'musica cristiana',
-          'vallenato colombiano': 'vallenato',
-          'salsa colombiana': 'salsa',
-          'merengue': 'merengue',
-          'bachata': 'bachata'
+          'musica cristiana en español': 'cristiana gospel',
+          'vallenato colombiano': 'vallenato carlos vives',
+          'salsa colombiana': 'salsa colombiana',
+          'merengue': 'merengue juan luis guerra',
+          'bachata': 'bachata romeo santos'
         };
-        const deezerTerm = termMap[term] || term;
-        const url = `https://api.deezer.com/search?q=${encodeURIComponent(deezerTerm)}&limit=12&output=json`;
-        const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(url)}`;
-        const res = await fetch(proxyUrl);
-        const data = await res.json();
-        const songs = (data.data || []).map(s => ({
-          trackName: s.title,
-          artistName: s.artist ? s.artist.name : '',
-          artworkUrl100: s.album ? s.album.cover_medium : '',
-          previewUrl: s.preview || ''
-        }));
+        const q = termMap[term] || term;
+        
+        // Intentar múltiples proxies CORS
+        let songs = [];
+        const proxies = [
+          `https://api.allorigins.win/raw?url=${encodeURIComponent('https://api.deezer.com/search?q=' + encodeURIComponent(q) + '&limit=12')}`,
+          `https://corsproxy.io/?${encodeURIComponent('https://api.deezer.com/search?q=' + encodeURIComponent(q) + '&limit=12')}`,
+          `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent('https://api.deezer.com/search?q=' + encodeURIComponent(q) + '&limit=12')}`
+        ];
+        
+        for (const proxyUrl of proxies) {
+          try {
+            const res = await fetch(proxyUrl);
+            const data = await res.json();
+            if (data.data && data.data.length > 0) {
+              songs = data.data.map(s => ({
+                trackName: s.title,
+                artistName: s.artist ? s.artist.name : '',
+                artworkUrl100: s.album ? s.album.cover_medium : '',
+                previewUrl: s.preview || ''
+              }));
+              break;
+            }
+          } catch(e) { continue; }
+        }
         renderSongs(songs);
       } catch(e) {
         if (loading) loading.style.display = 'none';
