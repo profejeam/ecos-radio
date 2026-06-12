@@ -1624,25 +1624,43 @@
         return;
       }
       const secureUrl = previewUrl.replace('http://', 'https://');
-      // Forzar proxy directamente — iTunes bloquea CORS sin proxy
-      const proxied = 'https://corsproxy.io/?' + encodeURIComponent(secureUrl);
-      const a = new Audio(proxied);
-      a.volume = 0.8;
-      _prev = a; _prevCard = cardEl;
-      a.addEventListener('error', () => {
-        resetBtn(cardEl); _prev = null; _prevCard = null;
-        const lbl = cardEl.querySelector('.play-label');
-        if (lbl) { lbl.textContent = 'No disponible'; setTimeout(() => { lbl.textContent = 'Probar'; }, 2000); }
-      });
-      a.addEventListener('ended', () => { resetBtn(cardEl); _prev = null; _prevCard = null; });
-      a.play().then(() => {
-        setPlayingBtn(cardEl);
-        try { updateInfo(name, artist + ' · Vista previa 30s'); } catch(e) {}
-      }).catch(() => {
-        resetBtn(cardEl); _prev = null; _prevCard = null;
-        const lbl = cardEl.querySelector('.play-label');
-        if (lbl) { lbl.textContent = 'No disponible'; setTimeout(() => { lbl.textContent = 'Probar'; }, 2000); }
-      });
+      // Lista de proxies CORS a intentar en orden
+      const proxies = [
+        secureUrl, // directo primero
+        'https://corsproxy.io/?' + encodeURIComponent(secureUrl),
+        'https://api.allorigins.win/raw?url=' + encodeURIComponent(secureUrl),
+        'https://thingproxy.freeboard.io/fetch/' + secureUrl
+      ];
+
+      let proxyIndex = 0;
+
+      function tryNextProxy() {
+        if (proxyIndex >= proxies.length) {
+          resetBtn(cardEl); _prev = null; _prevCard = null;
+          const lbl = cardEl.querySelector('.play-label');
+          if (lbl) { lbl.textContent = 'No disponible'; setTimeout(() => { lbl.textContent = 'Probar'; }, 2000); }
+          return;
+        }
+        const a = new Audio(proxies[proxyIndex]);
+        a.volume = 0.8;
+        _prev = a; _prevCard = cardEl;
+
+        a.addEventListener('error', () => {
+          proxyIndex++;
+          tryNextProxy();
+        });
+        a.addEventListener('ended', () => { resetBtn(cardEl); _prev = null; _prevCard = null; });
+
+        a.play().then(() => {
+          setPlayingBtn(cardEl);
+          try { updateInfo(name, artist + ' · Vista previa 30s'); } catch(e) {}
+        }).catch(() => {
+          proxyIndex++;
+          tryNextProxy();
+        });
+      }
+
+      tryNextProxy();
     }
 
     async function searchSongs(term, btnEl) {
@@ -1653,12 +1671,24 @@
       if (loading) loading.style.display = 'block';
       if (container) container.style.display = 'none';
       try {
-        const url = `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&media=music&limit=12&country=CO`;
-        const res = await fetch(url);
+        // Mapear términos de búsqueda a Deezer
+        const termMap = {
+          'musica cristiana en español': 'musica cristiana',
+          'vallenato colombiano': 'vallenato',
+          'salsa colombiana': 'salsa',
+          'merengue': 'merengue',
+          'bachata': 'bachata'
+        };
+        const deezerTerm = termMap[term] || term;
+        const url = `https://api.deezer.com/search?q=${encodeURIComponent(deezerTerm)}&limit=12&output=json`;
+        const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(url)}`;
+        const res = await fetch(proxyUrl);
         const data = await res.json();
-        const songs = (data.results || []).map(s => ({
-          ...s,
-          previewUrl: s.previewUrl ? s.previewUrl.replace('http://', 'https://') : ''
+        const songs = (data.data || []).map(s => ({
+          trackName: s.title,
+          artistName: s.artist ? s.artist.name : '',
+          artworkUrl100: s.album ? s.album.cover_medium : '',
+          previewUrl: s.preview || ''
         }));
         renderSongs(songs);
       } catch(e) {
